@@ -12,5 +12,5 @@ Test(CSE320_Suite, test_it_really_does_say_hi) {
                             "say_hi() function returns empty string!");
 
     cr_assert_str_eq(say_hi(), "Hi",
-                     "say_hi() function did not say 'Hi'");
+                     		"say_hi() function did not say 'Hi'");
 }
