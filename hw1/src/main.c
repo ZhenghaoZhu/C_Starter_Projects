@@ -18,11 +18,24 @@
 
 int main(int argc, char **argv)
 {
-    if(validargs(argc, argv))
+    int validArgsRet;
+    validArgsRet = validargs(argc, argv);
+    if(validArgsRet == -1){
+        printf("INVALID ARGS \n");
         USAGE(*argv, EXIT_FAILURE);
-    if(global_options & 1)
+        return EXIT_FAILURE;
+    }
+    if(global_options & 1){
         USAGE(*argv, EXIT_SUCCESS);
+        return EXIT_SUCCESS;
+    }
+
+    if(validArgsRet == 0){
+        printf("Not help flag \n");
+        return EXIT_SUCCESS;
+    }
     // TO BE IMPLEMENTED
+    global_options = 0x0;
     return EXIT_FAILURE;
 }
 

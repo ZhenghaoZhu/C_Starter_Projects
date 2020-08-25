@@ -22,4 +22,11 @@ int dtmf_freqs[NUM_DTMF_FREQS];
  */
 uint8_t dtmf_symbol_names[NUM_DTMF_ROW_FREQS][NUM_DTMF_COL_FREQS];
 
+/*
+ * Helper Functions due to lack of libraries
+ */
+int check_strings(char *string_one, char *string_two);
+int check_flag_range(int minVal, int maxVal, int currVal);
+
+
 #endif
