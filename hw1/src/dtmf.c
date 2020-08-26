@@ -108,5 +108,99 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
 int validargs(int argc, char **argv)
 {
     // TO BE IMPLEMENTED
-    return -1;
+    int i;
+    int currVal;
+    currVal = 0;
+    /*Too few arguments*/
+    if(argc < 2){
+        return -1;
+    }
+
+    /*Too many arguments*/
+    if(argc > 8){
+        return -1;
+    }
+
+    /*Check first flag*/
+    if(argv[1][0] == '-' && argv[1][1] == 'h'){
+        // Help Mode
+        global_options = HELP_OPTION;
+        return 0;
+    } else if(argv[1][0] == '-' && argv[1][1] == 'g'){
+        // TODO: Generate mode
+        for(i = 2; i < argc; i++){
+            if(argv[i][0] != '-'){
+                // Wrong flag character
+                return -1;
+            } else if (argv[i][1] == 't'){
+                // TODO: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
+                if(!(check_flag_range(0, UINT32_MAX, currVal))){
+                    return -1;
+                }
+                return 0;
+            } else if (argv[i][1] == 'l'){
+                // TODO: Check if nexr value is and int and valid based on range [-30, 30] 
+                if(!(check_flag_range(10, 1000, currVal))){
+                    return -1;
+                }      
+                return 0;        
+            } else if (argv[i][1] == 'n'){
+                return 0;
+            } else {
+                // Invalid flag
+                return -1;
+            }
+        }
+        global_options = GENERATE_OPTION;
+        return 0;
+    } else if(argv[1][0] == '-' && argv[1][1] == 'd'){
+        // TODO: Detect mode
+        for(i = 2; i < argc; i++){
+            if(argv[i][0] != '-'){
+                // Wrong flag character
+                return -1;
+            } else if (argv[i][1] == 'b'){
+                // TODO: Check if nexr value is and int and valid based on range [10, 1000]
+                if(!(check_flag_range(10, 1000, currVal))){
+                    return -1;
+                }
+                return 0;
+            } else {
+                // Invalid flag
+                return -1;
+            }
+        }
+        global_options = DETECT_OPTION;
+        return 0;
+    } else {
+        /*Invalid first flag*/
+        return -1;
+    }
+}
+
+// FIXME: Buggy with string_one
+int check_strings(char *string_one, char *string_two)
+{
+    int idx = 0;
+
+    for(;;){
+        printf("String one char %i: %c \n", idx, string_one[idx]);
+        printf("String two char %i: %c \n", idx, string_two[idx]);
+        if(string_one[idx] != string_two[idx]){
+            printf("NOT EQUAL \n");
+            return -1;
+        }
+        if(string_one[idx] == '\n' || string_two[idx] == '\n'){
+            printf("EQUAL \n");
+            return 0;
+        }
+        idx++;
+    }
+
+}
+
+int check_flag_range(int minVal, int maxVal, int currVal){
+    // TODO: Just need to check for currVal and pass here
+    return 1;
+    // return(currVal >= minVal && currVal <= maxVal);
 }

@@ -18,7 +18,9 @@
 
 int main(int argc, char **argv)
 {
-    if(validargs(argc, argv))
+    int validArgsRet = validargs(argc, argv);
+    
+    if(validArgsRet == -1)
         USAGE(*argv, EXIT_FAILURE);
     if(global_options & 1)
         USAGE(*argv, EXIT_SUCCESS);
