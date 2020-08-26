@@ -109,11 +109,27 @@ int validargs(int argc, char **argv)
 {
     // TO BE IMPLEMENTED
     int i;
-    int currVal;
-    currVal = 0;
+    int currVal = 0;
+    char frstChar = '0';
+    char scndChar = '0';
+    char **tempArgv = argv;  // pointer to pointer, not pointer to char
+    
+    tempArgv++;
+
     /*Too few arguments*/
     if(argc < 2){
         return -1;
+    }
+    if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
+        printf("INVALID COMMAND \n");
+        return -1;
+    }
+    tempArgv++;
+
+    if(frstChar == '-' && scndChar == 'h'){
+        // Help Mode
+        global_options = HELP_OPTION;
+        return 0;
     }
 
     /*Too many arguments*/
@@ -122,30 +138,32 @@ int validargs(int argc, char **argv)
     }
 
     /*Check first flag*/
-    if(argv[1][0] == '-' && argv[1][1] == 'h'){
-        // Help Mode
-        global_options = HELP_OPTION;
-        return 0;
-    } else if(argv[1][0] == '-' && argv[1][1] == 'g'){
+    if(frstChar == '-' && scndChar == 'g'){
         // TODO: Generate mode
+        printf("GENRATE MODE \n");
         for(i = 2; i < argc; i++){
-            if(argv[i][0] != '-'){
+            if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
+                printf("INVALID COMMAND \n");
+                return -1;
+            }
+            tempArgv++;
+            if(frstChar != '-'){
                 // Wrong flag character
                 return -1;
-            } else if (argv[i][1] == 't'){
+            } else if (scndChar == 't'){
                 // TODO: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
                 if(!(check_flag_range(0, UINT32_MAX, currVal))){
                     return -1;
                 }
-                return 0;
-            } else if (argv[i][1] == 'l'){
+                printf("T FLAG \n");
+            } else if (scndChar == 'l'){
                 // TODO: Check if nexr value is and int and valid based on range [-30, 30] 
                 if(!(check_flag_range(10, 1000, currVal))){
                     return -1;
                 }      
-                return 0;        
-            } else if (argv[i][1] == 'n'){
-                return 0;
+                printf("L FLAG \n");        
+            } else if (scndChar == 'n'){
+                printf("N FLAG \n");
             } else {
                 // Invalid flag
                 return -1;
@@ -153,17 +171,24 @@ int validargs(int argc, char **argv)
         }
         global_options = GENERATE_OPTION;
         return 0;
-    } else if(argv[1][0] == '-' && argv[1][1] == 'd'){
+    } else if(frstChar == '-' && scndChar == 'd'){
         // TODO: Detect mode
+        printf("DETECT MODE \n");
         for(i = 2; i < argc; i++){
-            if(argv[i][0] != '-'){
+            if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
+                printf("INVALID COMMAND \n");
+                return -1;
+            }
+            tempArgv++;
+            if(frstChar != '-'){
                 // Wrong flag character
                 return -1;
-            } else if (argv[i][1] == 'b'){
+            } else if (scndChar == 'b'){
                 // TODO: Check if nexr value is and int and valid based on range [10, 1000]
                 if(!(check_flag_range(10, 1000, currVal))){
                     return -1;
                 }
+                printf("B FLAG \n");
                 return 0;
             } else {
                 // Invalid flag
@@ -174,11 +199,12 @@ int validargs(int argc, char **argv)
         return 0;
     } else {
         /*Invalid first flag*/
+        printf("INVALID FLAG \n");
         return -1;
     }
 }
 
-// FIXME: Buggy with string_one
+// FIXME: Buggy with string_one and can't use brackets ([])
 int check_strings(char *string_one, char *string_two)
 {
     int idx = 0;
@@ -203,4 +229,20 @@ int check_flag_range(int minVal, int maxVal, int currVal){
     // TODO: Just need to check for currVal and pass here
     return 1;
     // return(currVal >= minVal && currVal <= maxVal);
+}
+
+int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
+    int flagLen = 0;
+    while (*flagPtr != '\0') {
+        *frstChar = *flagPtr;
+        if(*(++flagPtr) == '\0'){
+            return ++flagLen;
+        }
+        *scndChar = *flagPtr;
+        if(*(++flagPtr) == '\0'){
+            return ++flagLen;
+        };
+        flagLen += 3;
+    }
+    return flagLen;
 }

@@ -20,10 +20,15 @@ int main(int argc, char **argv)
 {
     int validArgsRet = validargs(argc, argv);
     
-    if(validArgsRet == -1)
+    if(validArgsRet == -1){
+        printf("FAILURE \n");
         USAGE(*argv, EXIT_FAILURE);
-    if(global_options & 1)
+    }
+    
+    if(global_options & 1){
+        printf("SUCCESS \n");
         USAGE(*argv, EXIT_SUCCESS);
+    }
     // TO BE IMPLEMENTED
     return EXIT_FAILURE;
 }
