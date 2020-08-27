@@ -110,10 +110,11 @@ int validargs(int argc, char **argv)
     // TO BE IMPLEMENTED
     int i;
     int currVal = 0;
+    int noiseFileLen = 0;
     char frstChar = '0';
     char scndChar = '0';
+    char *tempPtr = NULL;
     char **tempArgv = argv;  // pointer to pointer, not pointer to char
-    char *tmpBuf = "";
     global_options = 0x0;
     noise_level = 0;
     block_size = 100;
@@ -190,7 +191,15 @@ int validargs(int argc, char **argv)
                 printf("N FLAG \n");
                 // TODO: Parse noise file name and put in variable
                 noise_file = *tempArgv;
-                printf("Test %s", noise_file);
+                tempPtr = *tempArgv;
+                while(*tempPtr != '\0'){
+                    tempPtr++;
+                    noiseFileLen++;
+                }
+                if(noiseFileLen < 4){
+                    printf("Filename too short \n");
+                    return -1;
+                }
                 i++;
             } else {
                 // Invalid flag
