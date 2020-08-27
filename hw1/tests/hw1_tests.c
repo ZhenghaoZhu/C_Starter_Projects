@@ -24,11 +24,35 @@ Test(basecode_tests_suite, validargs_generate_test) {
     int exp_ret = 0;
     int opt = global_options;
     int flag = 0x2;
+
     cr_assert_eq(ret, exp_ret, "Invalid return for valid args.  Got: %d | Expected: %d",
 		 ret, exp_ret);
     cr_assert(opt & flag, "Generate mode bit wasn't set. Got: %x", opt);
     cr_assert_eq(strcmp(noise_file, nfile), 0,
 		 "Variable 'noise_file' was not properly set.  Got: %s | Expected: %s",
+		 noise_file, nfile);
+}
+
+Test(basecode_tests_suite, validargs_generate_second_test) {
+    char *nfile = "noise.au";
+    int argc = 8;
+    char *argv[] = {"bin/dtmf", "-g", "-t", "1000", "-l", "10", "-n", nfile, NULL};
+    int ret = validargs(argc, argv);
+    int exp_ret = 0;
+    int opt = global_options;
+    int flag = 0x2;
+
+    cr_assert_eq(ret, exp_ret, "Invalid return for valid args.  Got: %d | Expected: %d",
+		 ret, exp_ret);
+    cr_assert(opt & flag, "Generate mode bit wasn't set. Got: %x", opt);
+    cr_assert_eq(strcmp(noise_file, nfile), 0,
+		 "Variable 'noise_file' was not properly set.  Got: %s | Expected: %s",
+		 noise_file, nfile);
+    cr_assert_eq(audio_samples == 8000, 1,
+		 "Variable 'audio_samples' was not properly set.  Got: %s | Expected: %s",
+		 noise_file, nfile);
+    cr_assert_eq(noise_level == 10, 1,
+		 "Variable 'noise_level' was not properly set.  Got: %s | Expected: %s",
 		 noise_file, nfile);
 }
 
@@ -55,16 +79,21 @@ Test(basecode_tests_suite, validargs_error_test) {
 
 Test(basecode_tests_suite, help_system_test) {
     char *cmd = "bin/dtmf -h";
-
+    char *cmd2 = "bin/dtmf -h -g -t 1000 -l 10 -n noise.au";
     // system is a syscall defined in stdlib.h
     // it takes a shell command as a string and runs it
     // we use WEXITSTATUS to get the return code from the run
     // use 'man 3 system' to find out more
     int return_code = WEXITSTATUS(system(cmd));
+    int return_code_2 = WEXITSTATUS(system(cmd2));
 
     cr_assert_eq(return_code, EXIT_SUCCESS,
                  "Program exited with %d instead of EXIT_SUCCESS",
 		 return_code);
+    
+    cr_assert_eq(return_code_2, EXIT_SUCCESS,
+                 "Program exited with %d instead of EXIT_SUCCESS",
+		 return_code_2);
 }
 
 Test(basecode_tests_suite, goertzel_basic_test) {
