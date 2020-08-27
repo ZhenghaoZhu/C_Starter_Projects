@@ -113,6 +113,14 @@ int validargs(int argc, char **argv)
     char frstChar = '0';
     char scndChar = '0';
     char **tempArgv = argv;  // pointer to pointer, not pointer to char
+    char *tmpBuf = "";
+    global_options = 0x0;
+    noise_level = 0;
+    block_size = 100;
+    audio_samples = 1000;
+    noise_file = NULL;
+    // TODO: Put default value for noise_file
+    
     
     tempArgv++;
 
@@ -132,15 +140,14 @@ int validargs(int argc, char **argv)
         return 0;
     }
 
-    /*Too many arguments*/
-    if(argc > 8){
-        return -1;
-    }
+    // /*Too many arguments*/
+    // if(argc > 8){
+    //     return -1;
+    // }
 
     /*Check first flag*/
     if(frstChar == '-' && scndChar == 'g'){
         // TODO: Generate mode
-        printf("GENRATE MODE \n");
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
                 printf("INVALID COMMAND \n");
@@ -152,20 +159,42 @@ int validargs(int argc, char **argv)
                 return -1;
             } else if (scndChar == 't'){
                 // TODO: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
-                if(!(check_flag_range(0, UINT32_MAX, currVal))){
+                i++;
+                if(!(get_current_value(*tempArgv, &currVal))){
+                    printf("INVALID VALUE for -t \n");
                     return -1;
                 }
+                tempArgv++;
+                if(currVal < 0 || currVal > UINT32_MAX){
+                    printf("%i \n", currVal);
+                    printf("T Flag Value OOR \n");
+                    return -1;
+                }
+                audio_samples = currVal*8; // 8 samples every MSEC
                 printf("T FLAG \n");
             } else if (scndChar == 'l'){
-                // TODO: Check if nexr value is and int and valid based on range [-30, 30] 
-                if(!(check_flag_range(10, 1000, currVal))){
+                // TODO: Check if nexr value is and int and valid based on range [-30, 30]
+                i++;
+                if(!(get_current_value(*tempArgv, &currVal))){
+                    printf("INVALID VALUE for -l \n");
+                    return -1;
+                }
+                tempArgv++;
+                if(currVal < -30 || currVal > 30){
+                    printf("L Flag Value OOR \n");
                     return -1;
                 }      
+                noise_level = currVal;
                 printf("L FLAG \n");        
             } else if (scndChar == 'n'){
                 printf("N FLAG \n");
+                // TODO: Parse noise file name and put in variable
+                noise_file = *tempArgv;
+                printf("Test %s", noise_file);
+                i++;
             } else {
                 // Invalid flag
+                printf("INVALID FLAG \n");
                 return -1;
             }
         }
@@ -173,7 +202,6 @@ int validargs(int argc, char **argv)
         return 0;
     } else if(frstChar == '-' && scndChar == 'd'){
         // TODO: Detect mode
-        printf("DETECT MODE \n");
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
                 printf("INVALID COMMAND \n");
@@ -185,13 +213,22 @@ int validargs(int argc, char **argv)
                 return -1;
             } else if (scndChar == 'b'){
                 // TODO: Check if nexr value is and int and valid based on range [10, 1000]
-                if(!(check_flag_range(10, 1000, currVal))){
+                i++;
+                if(!(get_current_value(*tempArgv, &currVal))){
+                    printf("INVALID VALUE for -b \n");
                     return -1;
                 }
+                tempArgv++;
+                if(currVal < 10 || currVal > 1000){
+                    printf("%i \n", currVal);
+                    printf("B Flag Value OOR \n");
+                    return -1;
+                }
+                block_size = currVal;
                 printf("B FLAG \n");
-                return 0;
             } else {
                 // Invalid flag
+                printf("INVALID FLAG \n");
                 return -1;
             }
         }
@@ -225,15 +262,10 @@ int check_strings(char *string_one, char *string_two)
 
 }
 
-int check_flag_range(int minVal, int maxVal, int currVal){
-    // TODO: Just need to check for currVal and pass here
-    return 1;
-    // return(currVal >= minVal && currVal <= maxVal);
-}
 
 int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
     int flagLen = 0;
-    while (*flagPtr != '\0') {
+    while (*flagPtr != '\0'){
         *frstChar = *flagPtr;
         if(*(++flagPtr) == '\0'){
             return ++flagLen;
@@ -245,4 +277,43 @@ int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
         flagLen += 3;
     }
     return flagLen;
+}
+
+int get_current_value(char *valPtr, int *currVal){
+    *currVal = 0;
+    while(*valPtr != '\0'){
+        if((int)(*valPtr) > 57 || (int)(*valPtr) < 48){
+            return 0;
+        }
+        *currVal += ((int)(*valPtr) - 48);
+        *currVal *= 10;
+        valPtr++;
+    }
+    *currVal /= 10;
+    return 1;
+}
+
+int string_copy(char *src, char *dest){
+    if(dest == NULL){
+        return -1;
+    }
+    char *retPtr = dest;
+    int srcLen = 0;
+    while(*src != '\0'){
+        printf("Test 1 \n");
+        *dest = 'a';
+        printf("Test 2 \n");
+        *src = 'b';
+        dest++;
+        src++;
+        srcLen++;
+    }
+
+    // *dest = '\0'; //End string
+    dest -= srcLen;
+    printf("%p \n", dest);
+    if(srcLen < 4){
+        return -1;
+    }
+    return srcLen;
 }
