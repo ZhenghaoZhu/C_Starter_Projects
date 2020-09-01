@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
 #include "const.h"
@@ -20,6 +21,12 @@
 #ifdef _CTYPE_H
 #error "Do not #include <ctype.h>. You will get a ZERO."
 #endif
+
+int get_current_flag(char *flagPtr, char *frstChar, char *scndChar);
+int get_current_value(char *valPtr, long *currVal);
+int string_copy(char *src, char *dest);
+int check_string_equality(char *string_one, char *string_two);
+int get_file_header(FILE *file);
 
 /*
  * You may modify this file and/or move the functions contained here
@@ -109,7 +116,7 @@ int validargs(int argc, char **argv)
 {
     // TO BE IMPLEMENTED
     int i;
-    int currVal = 0;
+    long currVal = 0;
     int noiseFileLen = 0;
     char frstChar = '0';
     char scndChar = '0';
@@ -120,10 +127,9 @@ int validargs(int argc, char **argv)
     block_size = 100;
     audio_samples = 1000;
     noise_file = NULL;
-    // TODO: Put default value for noise_file
-    
-    
-    tempArgv++;
+    // DONE: Put default value for noise_file
+
+    tempArgv++; // Skip bin/dtmf to get to get to second argument
 
     /*Too few arguments*/
     if(argc < 2){
@@ -148,7 +154,7 @@ int validargs(int argc, char **argv)
 
     /*Check first flag*/
     if(frstChar == '-' && scndChar == 'g'){
-        // TODO: Generate mode
+        // DONE: Generate mode
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
                 printf("INVALID COMMAND \n");
@@ -159,22 +165,22 @@ int validargs(int argc, char **argv)
                 // Wrong flag character
                 return -1;
             } else if (scndChar == 't'){
-                // TODO: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
+                // DONE: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -t \n");
                     return -1;
                 }
                 tempArgv++;
-                if(currVal < 0 || currVal > UINT32_MAX){
-                    printf("%i \n", currVal);
-                    printf("T Flag Value OOR \n");
+                if(currVal < 0 || currVal > MAX_MSEC){
+                    printf("%li \n", currVal);
+                    printf("T Flag Value Out of Range \n");
                     return -1;
                 }
                 audio_samples = currVal*8; // 8 samples every MSEC
                 printf("T FLAG \n");
             } else if (scndChar == 'l'){
-                // TODO: Check if nexr value is and int and valid based on range [-30, 30]
+                // DONE: Check if nexr value is and int and valid based on range [-30, 30]
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -l \n");
@@ -182,14 +188,14 @@ int validargs(int argc, char **argv)
                 }
                 tempArgv++;
                 if(currVal < -30 || currVal > 30){
-                    printf("L Flag Value OOR \n");
+                    printf("L Flag Value Out of Range \n");
                     return -1;
                 }      
                 noise_level = currVal;
                 printf("L FLAG \n");        
             } else if (scndChar == 'n'){
                 printf("N FLAG \n");
-                // TODO: Parse noise file name and put in variable
+                // DONE: Parse noise file name and put in variable
                 noise_file = *tempArgv;
                 tempPtr = *tempArgv;
                 while(*tempPtr != '\0'){
@@ -210,7 +216,7 @@ int validargs(int argc, char **argv)
         global_options = GENERATE_OPTION;
         return 0;
     } else if(frstChar == '-' && scndChar == 'd'){
-        // TODO: Detect mode
+        // DONE: Detect mode
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
                 printf("INVALID COMMAND \n");
@@ -221,7 +227,7 @@ int validargs(int argc, char **argv)
                 // Wrong flag character
                 return -1;
             } else if (scndChar == 'b'){
-                // TODO: Check if nexr value is and int and valid based on range [10, 1000]
+                // DONE: Check if nexr value is and int and valid based on range [10, 1000]
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -b \n");
@@ -229,8 +235,9 @@ int validargs(int argc, char **argv)
                 }
                 tempArgv++;
                 if(currVal < 10 || currVal > 1000){
-                    printf("%i \n", currVal);
-                    printf("B Flag Value OOR \n");
+                    printf("%li \n", currVal);
+                    printf("B Flag Value Out of Range \n");
+                    // TODO: unset_global_vars(); To unset all variables if errors encountered
                     return -1;
                 }
                 block_size = currVal;
@@ -250,23 +257,30 @@ int validargs(int argc, char **argv)
     }
 }
 
-// FIXME: Buggy with string_one and can't use brackets ([])
-int check_strings(char *string_one, char *string_two)
+// DONE: Buggy with string_one and can't use brackets ([])
+int check_string_equality(char *string_one, char *string_two)
 {
-    int idx = 0;
-
     for(;;){
-        printf("String one char %i: %c \n", idx, string_one[idx]);
-        printf("String two char %i: %c \n", idx, string_two[idx]);
-        if(string_one[idx] != string_two[idx]){
+        if(*string_one == '\0' || *string_two == '\0'){
+            if(*string_one != '\0'){
+                printf("NOT EQUAL \n");
+                return -1;
+            }
+            else if(*string_two != '\0'){
+                printf("NOT EQUAL \n");
+                return -1;
+            }
+            else {
+                printf("Strings are equal \n");
+                return 0;
+            }
+        }
+        if(*string_one != *string_two){
             printf("NOT EQUAL \n");
             return -1;
         }
-        if(string_one[idx] == '\n' || string_two[idx] == '\n'){
-            printf("EQUAL \n");
-            return 0;
-        }
-        idx++;
+        string_one++;
+        string_two++;
     }
 
 }
@@ -282,19 +296,19 @@ int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
         *scndChar = *flagPtr;
         if(*(++flagPtr) == '\0'){
             return ++flagLen;
-        };
+        }
         flagLen += 3;
     }
     return flagLen;
 }
 
-int get_current_value(char *valPtr, int *currVal){
+int get_current_value(char *valPtr, long *currVal){
     *currVal = 0;
     while(*valPtr != '\0'){
         if((int)(*valPtr) > 57 || (int)(*valPtr) < 48){
             return 0;
         }
-        *currVal += ((int)(*valPtr) - 48);
+        *currVal += ((long)(*valPtr) - 48);
         *currVal *= 10;
         valPtr++;
     }
@@ -325,4 +339,47 @@ int string_copy(char *src, char *dest){
         return -1;
     }
     return srcLen;
+}
+
+int get_file_header(FILE *file){
+    FILE* curFile;
+    int display;
+    int count = 0;
+    // curFile = fopen("rsrc/941Hz_1sec.au", "r"); // Open file for only reading, return NULL if file doesn't exist
+    curFile = file;
+    if(curFile == NULL){
+        printf("File inputted is NULL, please run program again and input correct absolute file path. \n");
+        return -1;
+    }
+    while (1) { 
+        // reading file 
+        display = fgetc(curFile); 
+  
+        // end of file indicator 
+        if (feof(curFile)) 
+            break; 
+  
+        // displaying every characters
+        if(display == 0){
+            printf("00 ");
+        }
+        else if(display < 16){
+            printf("0%x ", display);
+        }
+        else {
+            printf("%x ", display);
+        }
+
+        count++;
+        if(count >= 16){
+            printf("\n");
+            count = 0;
+        } 
+    } 
+  
+    // closes the file pointed by demo 
+    fclose(curFile); 
+    return 0;
+    // TODO: Look more into when to call detect mode 
+    // TODO: Look into when to call functions in audio.c 
 }

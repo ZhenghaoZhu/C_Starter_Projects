@@ -3,6 +3,8 @@
 
 #include "const.h"
 #include "debug.h"
+#include "dtmf.h"
+#include "audio.h"
 
 #ifdef _STRING_H
 #error "Do not #include <string.h>. You will get a ZERO."
@@ -29,8 +31,23 @@ int main(int argc, char **argv)
         printf("SUCCESS \n");
         USAGE(*argv, EXIT_SUCCESS);
     }
+    else if(global_options & 2){
+        printf("GENERATE OPTION \n");
+    }
+    else if(global_options & 4){
+        printf("DETECT OPTION \n");
+        AUDIO_HEADER ah;
+        ah.magic_number = 0;
+        ah.data_offset = 0;
+        ah.data_size = 0;
+        ah.encoding = 0;
+        ah.sample_rate = 0;
+        ah.channels = 0;
+        audio_read_header(stdin, &ah);
+    }
+
     // TO BE IMPLEMENTED
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
 
 /*

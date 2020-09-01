@@ -56,6 +56,11 @@ int audio_samples;   // Number of samples in generated audio file.
 #define MIN_DTMF_DURATION 0.03
 
 /*
+ * Default Initializations for structs
+ */
+#define NEW_AUDIO_HEADER {0, 0, 0, 0, 0, 0}
+
+/*
  * The following global variables have been provided for you.
  * You MUST use them for their stated purposes, because you are not permitted
  * to declare any arrays (or use any array brackets at all) in your own code.

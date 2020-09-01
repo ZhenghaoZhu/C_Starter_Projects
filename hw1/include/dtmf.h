@@ -9,6 +9,8 @@
 #define NUM_DTMF_ROW_FREQS 4
 #define NUM_DTMF_COL_FREQS 4
 
+#define MAX_MSEC 268435455 // 2,147,483,647/8
+
 /*
  * Table of DTMF frequencies, in Hz.
  * The frequencies are listed in increasing order, so that the first
@@ -21,12 +23,5 @@ int dtmf_freqs[NUM_DTMF_FREQS];
  * Table mapping (row freq, col freq) pairs to DTMF symbol names.
  */
 uint8_t dtmf_symbol_names[NUM_DTMF_ROW_FREQS][NUM_DTMF_COL_FREQS];
-
-/*
- * Functions to help with lack of libraries
- */
-int get_current_flag(char *flagPtr, char *frstChar, char *scndChar);
-int get_current_value(char *valPtr, int *currVal);
-int string_copy(char *src, char *dest);
 
 #endif
