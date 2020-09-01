@@ -115,7 +115,7 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
 int validargs(int argc, char **argv)
 {
     // TO BE IMPLEMENTED
-    int i;
+    uint32_t i;
     long currVal = 0;
     int noiseFileLen = 0;
     char frstChar = '0';
@@ -287,7 +287,7 @@ int check_string_equality(char *string_one, char *string_two)
 
 
 int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
-    int flagLen = 0;
+    uint32_t flagLen = 0;
     while (*flagPtr != '\0'){
         *frstChar = *flagPtr;
         if(*(++flagPtr) == '\0'){
@@ -321,7 +321,7 @@ int string_copy(char *src, char *dest){
         return -1;
     }
     char *retPtr = dest;
-    int srcLen = 0;
+    uint64_t srcLen = 0;
     while(*src != '\0'){
         printf("Test 1 \n");
         *dest = 'a';
@@ -343,8 +343,8 @@ int string_copy(char *src, char *dest){
 
 int get_file_header(FILE *file){
     FILE* curFile;
-    int display;
-    int count = 0;
+    uint32_t display;
+    uint32_t count = 0;
     // curFile = fopen("rsrc/941Hz_1sec.au", "r"); // Open file for only reading, return NULL if file doesn't exist
     curFile = file;
     if(curFile == NULL){

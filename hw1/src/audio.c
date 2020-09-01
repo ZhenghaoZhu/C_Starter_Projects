@@ -4,17 +4,19 @@
 #include "debug.h"
 
 int traverse_audio_file_header(FILE *curFile);
-int check_audio_header(int magic_number, int data_offset, int data_size, int encoding, int sample_rate, int channels);
+int check_audio_header(uint32_t magic_number, uint32_t data_offset, uint32_t data_size, uint32_t encoding, uint32_t sample_rate, uint32_t channels);
+int helper_audio_write_header(FILE *out, uint32_t curVar);
 
 int audio_read_header(FILE *in, AUDIO_HEADER *hp) {
     FILE* curFile;
     
     // curFile = fopen("rsrc/941Hz_1sec.au", "r"); // Open file for only reading, return NULL if file doesn't exist
-    curFile = in;
-    if(curFile == NULL){
+    if(in == NULL){
         printf("File inputted is NULL, please run program again and input correct absolute file path. \n");
-        return -1;
+        return EOF;
     }
+    curFile = in;
+    
 
     // NOTE: data_offset for writing into will always be 24. When reading, it can be varied.    
     hp->magic_number = traverse_audio_file_header(curFile);
@@ -44,8 +46,20 @@ int audio_read_header(FILE *in, AUDIO_HEADER *hp) {
 }
 
 int audio_write_header(FILE *out, AUDIO_HEADER *hp) {
-    // TO BE IMPLEMENTED
-    return EOF;
+
+    // NOTE: data_offset, for writing into, will always be 24. When reading, it can be varied.
+    if(out == NULL || feof(out)){
+        return EOF;
+    }
+
+    helper_audio_write_header(out, hp->magic_number);
+    helper_audio_write_header(out, hp->data_offset);
+    helper_audio_write_header(out, hp->data_size);
+    helper_audio_write_header(out, hp->encoding);
+    helper_audio_write_header(out, hp->sample_rate);
+    helper_audio_write_header(out, hp->channels);
+
+    return 0;
 }
 
 // NOTE: int16_t because each frame is 2 bytes due to 16-bit and single channel configuration
@@ -66,19 +80,22 @@ int traverse_audio_file_header(FILE *curFile){
     curHex = fgetc(curFile);
     fullHex ^= curHex;
     fullHex = fullHex << 8;
+
     curHex = fgetc(curFile);
     fullHex ^= curHex;
     fullHex = fullHex << 8;
+
     curHex = fgetc(curFile);
     fullHex ^= curHex;
     fullHex = fullHex << 8;
+    
     curHex = fgetc(curFile);
     fullHex ^= curHex;
 
     return fullHex;
 }
 
-int check_audio_header(int magic_number, int data_offset, int data_size, int encoding, int sample_rate, int channels){
+int check_audio_header(uint32_t magic_number, uint32_t data_offset, uint32_t data_size, uint32_t encoding, uint32_t sample_rate, uint32_t channels){
     if(magic_number != AUDIO_MAGIC){
         return 0;
     }
@@ -100,4 +117,21 @@ int check_audio_header(int magic_number, int data_offset, int data_size, int enc
 
     return 1;
 
+}
+
+int helper_audio_write_header(FILE *out, uint32_t curVar){
+    uint32_t curHex = 0x0;
+    int count = 3;
+    uint32_t curShift = 0;
+
+    while(count > -1){
+        curHex = 0x0;
+        curHex ^= curVar;
+        curShift = 8 * count;
+        curHex = curHex >> curShift;
+        fprintf(out, "%c", curHex);
+        count--;
+    }
+
+    return 0;
 }
