@@ -43,21 +43,29 @@ int main(int argc, char **argv)
         audio_write_header(stdout, &ah);
     }
     else if(global_options & 4){
-        printf("DETECT OPTION \n");
-        AUDIO_HEADER ah;
-        ah.magic_number = 0;
-        ah.data_offset = 0;
-        ah.data_size = 0;
-        ah.encoding = 0;
-        ah.sample_rate = 0;
-        ah.channels = 0;
-        audio_read_header(stdin, &ah);
-        printf("1: %i \n", ah.magic_number);
-        printf("2: %i \n", ah.data_offset);
-        printf("3: %i \n", ah.data_size);
-        printf("4: %i \n", ah.encoding);
-        printf("5: %i \n", ah.sample_rate);
-        printf("6: %i \n", ah.channels);
+        // printf("DETECT OPTION \n");
+        int16_t curSample = 0;
+        audio_read_sample(stdin, &curSample);
+        audio_write_sample(stdout, curSample);
+        
+        // printf("Current Sample: %p \n", pCurSample);
+        // printf("%c", curSample);
+
+        
+        // AUDIO_HEADER ah;
+        // ah.magic_number = 0;
+        // ah.data_offset = 0;
+        // ah.data_size = 0;
+        // ah.encoding = 0;
+        // ah.sample_rate = 0;
+        // ah.channels = 0;
+        // audio_read_header(stdin, &ah);
+        // printf("1: %i \n", ah.magic_number);
+        // printf("2: %i \n", ah.data_offset);
+        // printf("3: %i \n", ah.data_size);
+        // printf("4: %i \n", ah.encoding);
+        // printf("5: %i \n", ah.sample_rate);
+        // printf("6: %i \n", ah.channels);
     }
 
     // TO BE IMPLEMENTED

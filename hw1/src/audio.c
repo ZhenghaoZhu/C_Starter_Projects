@@ -64,18 +64,44 @@ int audio_write_header(FILE *out, AUDIO_HEADER *hp) {
 
 // NOTE: int16_t because each frame is 2 bytes due to 16-bit and single channel configuration
 int audio_read_sample(FILE *in, int16_t *samplep) {
-    // TO BE IMPLEMENTED
-    return EOF;
+    // TODO: Get offset from header to get to the right position of sample
+    
+    FILE *curFile;
+
+    curFile = in;
+    int16_t curHex = 0x0;
+    int16_t fullHex = 0x0;
+    
+    curHex = fgetc(curFile);
+    fullHex ^= curHex;
+    fullHex = fullHex << 8;
+
+    curHex = fgetc(curFile);
+    fullHex ^= curHex;
+    *samplep = fullHex;
+
+    return 0;
 }
 
 int audio_write_sample(FILE *out, int16_t sample) {
-    // TO BE IMPLEMENTED
-    return EOF;
+    
+    FILE *curFile;
+    uint16_t curHex = 0x0;
+    curFile = out;
+
+    curHex ^= sample;
+    curHex = curHex >> 8;
+    fprintf(curFile, "%c", curHex);
+    curHex = 0x0;
+    curHex ^= sample;
+    fprintf(curFile, "%c", curHex);
+
+    return 0;
 }
 
 int traverse_audio_file_header(FILE *curFile){
-    int curHex = 0x0;
-    int fullHex = 0x0;
+    uint32_t curHex = 0x0;
+    uint32_t fullHex = 0x0;
     
     curHex = fgetc(curFile);
     fullHex ^= curHex;
@@ -88,7 +114,7 @@ int traverse_audio_file_header(FILE *curFile){
     curHex = fgetc(curFile);
     fullHex ^= curHex;
     fullHex = fullHex << 8;
-    
+
     curHex = fgetc(curFile);
     fullHex ^= curHex;
 
@@ -120,6 +146,7 @@ int check_audio_header(uint32_t magic_number, uint32_t data_offset, uint32_t dat
 }
 
 int helper_audio_write_header(FILE *out, uint32_t curVar){
+    FILE *curFile = out;
     uint32_t curHex = 0x0;
     int count = 3;
     uint32_t curShift = 0;
@@ -129,7 +156,7 @@ int helper_audio_write_header(FILE *out, uint32_t curVar){
         curHex ^= curVar;
         curShift = 8 * count;
         curHex = curHex >> curShift;
-        fprintf(out, "%c", curHex);
+        fprintf(curFile, "%c", curHex);
         count--;
     }
 
