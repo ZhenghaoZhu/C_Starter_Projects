@@ -123,11 +123,9 @@ int validargs(int argc, char **argv)
     char *tempPtr = NULL;
     char **tempArgv = argv;  // pointer to pointer, not pointer to char
     global_options = 0x0;
-    noise_level = 0;
-    block_size = 100;
-    audio_samples = 1000;
-    noise_file = NULL;
-    // DONE: Put default value for noise_file
+    int temp_noise_level = -1;
+    int temp_block_size = -1;
+    int temp_audio_samples = -1;
 
     tempArgv++; // Skip bin/dtmf to get to get to second argument
 
@@ -177,7 +175,7 @@ int validargs(int argc, char **argv)
                     printf("T Flag Value Out of Range \n");
                     return -1;
                 }
-                audio_samples = currVal*8; // 8 samples every MSEC
+                temp_audio_samples = currVal*8; // 8 samples every MSEC
                 printf("T FLAG \n");
             } else if (scndChar == 'l'){
                 // DONE: Check if nexr value is and int and valid based on range [-30, 30]
@@ -191,7 +189,7 @@ int validargs(int argc, char **argv)
                     printf("L Flag Value Out of Range \n");
                     return -1;
                 }      
-                noise_level = currVal;
+                temp_noise_level = currVal;
                 printf("L FLAG \n");        
             } else if (scndChar == 'n'){
                 printf("N FLAG \n");
@@ -202,6 +200,7 @@ int validargs(int argc, char **argv)
                     tempPtr++;
                     noiseFileLen++;
                 }
+                tempArgv++;
                 if(noiseFileLen < 4){
                     printf("Filename too short \n");
                     return -1;
@@ -212,6 +211,27 @@ int validargs(int argc, char **argv)
                 printf("INVALID FLAG \n");
                 return -1;
             }
+        }
+        if(temp_audio_samples != -1){
+            audio_samples = temp_audio_samples;
+        } else {
+            audio_samples = 1000;
+        }
+
+        if(temp_block_size != -1){
+            block_size = temp_block_size;
+        } else {
+            block_size = 100;
+        }
+
+        if(temp_noise_level != -1){
+            noise_level = temp_noise_level;
+        } else {
+            noise_level = 0;
+        }
+
+        if(noiseFileLen == 0){
+            noise_file = NULL;
         }
         global_options = GENERATE_OPTION;
         return 0;
@@ -228,11 +248,11 @@ int validargs(int argc, char **argv)
                 return -1;
             } else if (scndChar == 'b'){
                 // DONE: Check if nexr value is and int and valid based on range [10, 1000]
-                i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -b \n");
                     return -1;
                 }
+                i++;
                 tempArgv++;
                 if(currVal < 10 || currVal > 1000){
                     printf("%li \n", currVal);
@@ -240,13 +260,34 @@ int validargs(int argc, char **argv)
                     // TODO: unset_global_vars(); To unset all variables if errors encountered
                     return -1;
                 }
-                block_size = currVal;
-                printf("B FLAG \n");
+                temp_block_size = currVal;
+                // printf("B FLAG");
             } else {
                 // Invalid flag
                 printf("INVALID FLAG \n");
                 return -1;
             }
+        }
+        if(temp_audio_samples != -1){
+            audio_samples = temp_audio_samples;
+        } else {
+            audio_samples = 1000;
+        }
+
+        if(temp_block_size != -1){
+            block_size = temp_block_size;
+        } else {
+            block_size = 100;
+        }
+
+        if(temp_noise_level != -1){
+            noise_level = temp_noise_level;
+        } else {
+            noise_level = 0;
+        }
+
+        if(noiseFileLen == 0){
+            noise_file = NULL;
         }
         global_options = DETECT_OPTION;
         return 0;
@@ -255,6 +296,7 @@ int validargs(int argc, char **argv)
         printf("INVALID FLAG \n");
         return -1;
     }
+
 }
 
 // DONE: Buggy with string_one and can't use brackets ([])

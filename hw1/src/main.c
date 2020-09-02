@@ -45,9 +45,19 @@ int main(int argc, char **argv)
     else if(global_options & 4){
         // printf("DETECT OPTION \n");
         int16_t curSample = 0;
-        audio_read_sample(stdin, &curSample);
-        audio_write_sample(stdout, curSample);
+
+        // NOTE: Only checking if stdin has something to not prompt user to enter something.
+        if((fseek(stdin, 0, SEEK_END), ftell(stdin)) > 0){
+            rewind(stdin);
+            audio_read_sample(stdin, &curSample);
+        } else {
+            printf("NO STDIN GIVEN. \n");
+            return EXIT_SUCCESS;
+        }
         
+        // NOTE: It's fine if stdout is nothing as it will just print out to console.
+        audio_write_sample(stdout, curSample);
+
         // printf("Current Sample: %p \n", pCurSample);
         // printf("%c", curSample);
 
