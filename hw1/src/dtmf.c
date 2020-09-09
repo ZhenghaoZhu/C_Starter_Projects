@@ -152,6 +152,9 @@ int validargs(int argc, char **argv)
 
     /*Check first flag*/
     if(frstChar == '-' && scndChar == 'g'){
+        bool tFlagSeen = false;
+        bool lFlagSeen = false;
+        bool nFlagSeen = false;
         // DONE: Generate mode
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
@@ -162,8 +165,9 @@ int validargs(int argc, char **argv)
             if(frstChar != '-'){
                 // Wrong flag character
                 return -1;
-            } else if (scndChar == 't'){
+            } else if (scndChar == 't' && !tFlagSeen){
                 // DONE: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
+                tFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -t \n");
@@ -176,9 +180,10 @@ int validargs(int argc, char **argv)
                     return -1;
                 }
                 temp_audio_samples = currVal*8; // 8 samples every MSEC
-                printf("T FLAG \n");
-            } else if (scndChar == 'l'){
+                // printf("T FLAG \n");
+            } else if (scndChar == 'l' && !lFlagSeen){
                 // DONE: Check if nexr value is and int and valid based on range [-30, 30]
+                lFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -l \n");
@@ -190,9 +195,11 @@ int validargs(int argc, char **argv)
                     return -1;
                 }      
                 temp_noise_level = currVal;
-                printf("L FLAG \n");        
-            } else if (scndChar == 'n'){
-                printf("N FLAG \n");
+                // printf("L FLAG \n");        
+            } else if (scndChar == 'n' && !nFlagSeen){
+                nFlagSeen = true;
+                i++;
+                // printf("N FLAG \n");
                 // DONE: Parse noise file name and put in variable
                 noise_file = *tempArgv;
                 tempPtr = *tempArgv;
@@ -205,10 +212,10 @@ int validargs(int argc, char **argv)
                     printf("Filename too short \n");
                     return -1;
                 }
-                i++;
+                
             } else {
                 // Invalid flag
-                printf("INVALID FLAG \n");
+                printf("INVALID FLAG(S) \n");
                 return -1;
             }
         }
@@ -236,6 +243,7 @@ int validargs(int argc, char **argv)
         global_options = GENERATE_OPTION;
         return 0;
     } else if(frstChar == '-' && scndChar == 'd'){
+        bool bFlagSeen = false;
         // DONE: Detect mode
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
@@ -246,13 +254,14 @@ int validargs(int argc, char **argv)
             if(frstChar != '-'){
                 // Wrong flag character
                 return -1;
-            } else if (scndChar == 'b'){
+            } else if (scndChar == 'b' && !bFlagSeen){
                 // DONE: Check if nexr value is and int and valid based on range [10, 1000]
+                bFlagSeen = true;
+                i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -b \n");
                     return -1;
                 }
-                i++;
                 tempArgv++;
                 if(currVal < 10 || currVal > 1000){
                     printf("%li \n", currVal);
@@ -385,7 +394,7 @@ int string_copy(char *src, char *dest){
 
 int get_file_header(FILE *file){
     FILE* curFile;
-    uint32_t display;
+    int8_t display;
     uint32_t count = 0;
     // curFile = fopen("rsrc/941Hz_1sec.au", "r"); // Open file for only reading, return NULL if file doesn't exist
     curFile = file;
