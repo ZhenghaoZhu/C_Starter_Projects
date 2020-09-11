@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "dtmf.h"
 #include "audio.h"
+#include "goertzel.h"
 
 #ifdef _STRING_H
 #error "Do not #include <string.h>. You will get a ZERO."
@@ -22,10 +23,11 @@ int main(int argc, char **argv)
 {
     int validArgsRet = validargs(argc, argv);
     
-    if(validArgsRet == -1){
+    if(validArgsRet == -1 && global_options == 0x0){
         USAGE(*argv, EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
-    
+
     if(global_options & 1){
         USAGE(*argv, EXIT_SUCCESS);
     }
@@ -44,11 +46,21 @@ int main(int argc, char **argv)
     }
     else if(global_options & 4){
         // printf("DETECT OPTION \n");
+        GOERTZEL_STATE gs;
+        double goertzel_k = 0.0;
+        // NOTE: Might need to change this base on flag values
+        uint32_t samples_N = 8000;
+        goertzel_init(&gs, samples_N, goertzel_k);
+
+        return 0;
+
         int16_t curSample = 0;
 
-        // NOTE: Only checking if stdin has something to not prompt user to enter something.
-        if((fseek(stdin, 0, SEEK_END), ftell(stdin)) > 0){
-            rewind(stdin);
+
+        int8_t ch = 1;
+        if((ch = fgetc(stdin)) != EOF){
+            // NOTE: Can't rewind as piping doesn't support it
+            curSample = ch;
             audio_read_sample(stdin, &curSample);
         } else {
             printf("NO STDIN GIVEN. \n");
@@ -57,6 +69,7 @@ int main(int argc, char **argv)
         
         // NOTE: It's fine if stdout is nothing as it will just print out to console.
         audio_write_sample(stdout, curSample);
+        printf("\n");
 
         // printf("Current Sample: %p \n", pCurSample);
         // printf("%c", curSample);

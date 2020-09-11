@@ -33,6 +33,15 @@ typedef struct goertzel_state {
 } GOERTZEL_STATE;
 
 /*
+ * Structure representing complex number pair with real and imaginary parts.
+ * Used to calculate Goertezel strength.
+ */
+typedef struct complex_pair {
+    double real;
+    double imag;
+} COMPLEX_PAIR;
+
+/*
  * Initialize the state of an instance of the Goertzel algorithm.
  *
  *   @param gp  Pointer to structure to be initialized.

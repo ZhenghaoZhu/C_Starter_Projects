@@ -105,10 +105,10 @@ Test(basecode_tests_suite, goertzel_basic_test) {
     goertzel_init(&g2, N, 2);
     double x;
     for(int i = 0; i < N-1; i++) {
-	x = cos(2 * M_PI * i / N);
-	goertzel_step(&g0, x);
-	goertzel_step(&g1, x);
-	goertzel_step(&g2, x);
+        x = cos(2 * M_PI * i / N);
+        goertzel_step(&g0, x);
+        goertzel_step(&g1, x);
+        goertzel_step(&g2, x);
     }
     x = cos(2 * M_PI * (N-1) / N);
     double r0 = goertzel_strength(&g0, x);
