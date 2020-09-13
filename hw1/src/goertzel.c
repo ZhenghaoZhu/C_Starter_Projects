@@ -42,20 +42,20 @@ double goertzel_strength(GOERTZEL_STATE *gp, double x) {
     constant_c.real = cos(gp->A);
     constant_c.imag = -1.0  * sin(gp->A);
 
-    constant_d.real = cos(gp->A * ((gp->N )- 1));
+    constant_d.real = cos(gp->A * ((gp->N) - 1));
     constant_d.imag = -1.0  * sin(gp->A * ((gp->N) - 1));
 
     // printf("A: %lf B: %lf, C Real: %lf, C Imag: %lf, D Real: %lf, D Imag: %lf \n", gp->A, gp->B, constant_c.real, constant_c.imag, constant_d.real, constant_d.imag);
     gp->s0 = gp->B*gp->s1 + x - gp->s2;
     // printf("s0: %lf, s1: %lf \n", gp->s0, gp->s1);
     y_A = (-1.0 * gp->s1 * constant_c.real) + gp->s0;
-    y_B = -1.0 * gp->s1 * constant_c.imag;
+    y_B = gp->s1 * constant_c.imag;
     y_C = constant_d.real;
     y_D = constant_d.imag;
 
     // printf("Y Real: %lf, Y Imag: %lf \n", y_complex_pair.real, y_complex_pair.imag);
     
-    y_complex_pair.real = (-1 * y_A * y_C) + (y_B * y_D);
+    y_complex_pair.real = (y_A * y_C) - (y_B * y_D);
     y_complex_pair.imag = (y_A * y_D) + (y_B * y_C);
 
     // printf("Y Real: %lf, Y Imag: %lf \n", y_complex_pair.real, y_complex_pair.imag);

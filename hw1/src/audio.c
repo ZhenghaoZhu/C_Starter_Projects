@@ -71,9 +71,6 @@ int audio_read_sample(FILE *in, int16_t *samplep) {
     curFile = in;
     int8_t curHex = 0x0;
     int16_t fullHex = 0x0;
-
-    fullHex ^= *samplep;
-    fullHex = fullHex << 8;
     
     if((curHex = fgetc(curFile)) != EOF){
         fullHex ^= curHex;
@@ -81,6 +78,7 @@ int audio_read_sample(FILE *in, int16_t *samplep) {
         return EOF;
     }
 
+    // printf("FULL HEX: %x \n", fullHex);
     *samplep = fullHex;
 
     return 0;

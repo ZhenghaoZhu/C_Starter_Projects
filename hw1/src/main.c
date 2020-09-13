@@ -45,12 +45,45 @@ int main(int argc, char **argv)
         audio_write_header(stdout, &ah);
     }
     else if(global_options & 4){
-        // printf("DETECT OPTION \n");
-        GOERTZEL_STATE gs;
-        double goertzel_k = 0.0;
-        // NOTE: Might need to change this base on flag values
-        uint32_t samples_N = 8000;
-        goertzel_init(&gs, samples_N, goertzel_k);
+        printf("DETECT OPTION \n");
+        // double hz[] = {697.0, 770.0, 852.0, 941.0}; // ONLY FOR TESTING PURPOSES, WILL REMOVE IN FINAL BUILD
+        double hz[] = {770.0}; // ONLY FOR TESTING PURPOSES, WILL REMOVE IN FINAL BUILD
+        FILE *stdinCopy = stdin;
+        for(int i = 0; i < 1; i++){
+            GOERTZEL_STATE gs;
+            uint32_t samples_N = 1000;
+            double goertzel_k = (hz[i]/8000) * samples_N;
+            printf("Curr K: %lf \n", goertzel_k);
+            // NOTE: Might need to change this base on flag values
+            FILE *stdinP = stdinCopy;
+            // int16_t offset = 0;
+            int offsetInt = 0;
+            for(int i = 0; i < 24; i++){
+                fgetc(stdinP);
+                // offset = 0;
+            }
+            goertzel_init(&gs, samples_N, goertzel_k);
+            int16_t curX = 0;
+            double doubleCurX = 0.0;
+            for(int i = 0; i < 999; i++){
+                audio_read_sample(stdinP, &curX);
+                doubleCurX = (double)curX;
+                doubleCurX /= INT16_MAX;
+                // printf("Cur X: %x \n", curX);
+                goertzel_step(&gs, doubleCurX);
+                curX = 0;
+            }
+            audio_read_sample(stdinP, &curX);
+            double curStrength = goertzel_strength(&gs, (double)curX);
+
+            printf("Current Strength for %lf hz: %lf \n", hz[i], curStrength);
+        }
+        // for(int i = 0; i < 10; i++){
+        //     int16_t test1 = 0;
+        //     audio_read_sample(stdin, &test1);
+        //     printf("Test 1: %x \n", test1);
+        // }
+        
 
         return 0;
 
