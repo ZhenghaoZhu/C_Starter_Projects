@@ -69,12 +69,22 @@ int audio_read_sample(FILE *in, int16_t *samplep) {
     FILE *curFile;
 
     curFile = in;
-    int8_t curHex = 0x0;
+    int16_t curHex = 0x0;
     int16_t fullHex = 0x0;
     
     if((curHex = fgetc(curFile)) != EOF){
         fullHex ^= curHex;
+        fullHex = fullHex << 8;
     } else {
+        return EOF;
+    }
+
+    curHex = 0x0;
+    
+    if((curHex = fgetc(curFile)) != EOF){
+        fullHex ^= curHex;
+    } else {
+        printf("EOF \n");
         return EOF;
     }
 
@@ -87,15 +97,10 @@ int audio_read_sample(FILE *in, int16_t *samplep) {
 int audio_write_sample(FILE *out, int16_t sample) {
     
     FILE *curFile;
-    uint16_t curHex = 0x0;
     curFile = out;
 
-    curHex ^= sample;
-    curHex = curHex >> 8;
-    fprintf(curFile, "%c", curHex);
-    curHex = 0x0;
-    curHex ^= sample;
-    fprintf(curFile, "%c", curHex);
+    fprintf(curFile, "%c", ((sample & 0xFF00) >> 8));
+    fprintf(curFile, "%c", (sample & 0x00FF));
 
     return 0;
 }

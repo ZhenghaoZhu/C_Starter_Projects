@@ -42,8 +42,8 @@ double goertzel_strength(GOERTZEL_STATE *gp, double x) {
     constant_c.real = cos(gp->A);
     constant_c.imag = -1.0  * sin(gp->A);
 
-    constant_d.real = cos(gp->A * ((gp->N) - 1));
-    constant_d.imag = -1.0  * sin(gp->A * ((gp->N) - 1));
+    constant_d.real = cos(gp->A * ((gp->N) - 1.0));
+    constant_d.imag = -1.0  * sin(gp->A * ((gp->N) - 1.0));
 
     // printf("A: %lf B: %lf, C Real: %lf, C Imag: %lf, D Real: %lf, D Imag: %lf \n", gp->A, gp->B, constant_c.real, constant_c.imag, constant_d.real, constant_d.imag);
     gp->s0 = gp->B*gp->s1 + x - gp->s2;
@@ -60,9 +60,9 @@ double goertzel_strength(GOERTZEL_STATE *gp, double x) {
 
     // printf("Y Real: %lf, Y Imag: %lf \n", y_complex_pair.real, y_complex_pair.imag);
 
-    sqrd_mag_y = pow(y_complex_pair.real, 2) + pow(y_complex_pair.imag, 2);
+    sqrd_mag_y = pow(y_complex_pair.real, 2.0) + pow(y_complex_pair.imag, 2.0);
 
-    complete_y = (2 * sqrd_mag_y)/(gp->N * gp->N);
+    complete_y = (2.0 * sqrd_mag_y)/(gp->N * gp->N);
 
     return complete_y;
 }
