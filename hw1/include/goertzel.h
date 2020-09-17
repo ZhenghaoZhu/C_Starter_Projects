@@ -32,7 +32,6 @@ typedef struct goertzel_state {
     double s2;
 } GOERTZEL_STATE;
 
-
 /*
  * Initialize the state of an instance of the Goertzel algorithm.
  *

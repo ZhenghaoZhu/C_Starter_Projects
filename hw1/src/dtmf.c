@@ -27,6 +27,7 @@ int get_current_value(char *valPtr, long *currVal);
 int string_copy(char *src, char *dest);
 int check_string_equality(char *string_one, char *string_two);
 double getMax(double d1, double d2);
+int check_SIX_DB(double mainStr, double str1, double str2, double str3);
 
 /*
  * You may modify this file and/or move the functions contained here
@@ -150,7 +151,7 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
         freqPtr = dtmf_freqs;
         int16_t curX = 0;
         double doubleCurX = 0.0;
-        
+
         for(int i = 0; i < (N - 1); i++){
             curBlockSize++;
             audio_read_sample(audio_in, &curX);
@@ -204,50 +205,50 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
             bool colRatioMinDB = false;
             
             if(curStrongRow == str_697){
-                if((str_697/str_770 >= SIX_DB) && (str_697/str_852 >= SIX_DB) && (str_697/str_941 >= SIX_DB)){
+                if(check_SIX_DB(str_697, str_770, str_852, str_941)){
                     curRowTone = 0;
                     rowRatioMinDB = true;
                 }
             } 
             else if(curStrongRow == str_770){
-                if((str_770/str_697 >= SIX_DB) && (str_770/str_852 >= SIX_DB) && (str_770/str_941 >= SIX_DB)){
+                if(check_SIX_DB(str_770, str_697, str_852, str_941)){
                     curRowTone = 4;
                     rowRatioMinDB = true;
                 }
             } 
             else if(curStrongRow == str_852){
-                if((str_852/str_697 >= SIX_DB) && (str_852/str_770 >= SIX_DB) && (str_852/str_941 >= SIX_DB)){
+                if(check_SIX_DB(str_852, str_697, str_770, str_941)){
                     curRowTone = 8;
                     rowRatioMinDB = true;
                 }
             } 
             else { // str_941
-                if((str_941/str_697 >= SIX_DB) && (str_941/str_770 >= SIX_DB) && (str_941/str_852 >= SIX_DB)){
+                if(check_SIX_DB(str_941, str_697, str_770, str_852)){
                     curRowTone = 12;
                     rowRatioMinDB = true;
                 }
             }
 
             if(curStrongCol == str_1209){
-                if((str_1209/str_1336 >= SIX_DB) && (str_1209/str_1477 >= SIX_DB) && (str_1209/str_1633 >= SIX_DB)){
+                if(check_SIX_DB(str_1209, str_1336, str_1477, str_1633)){
                     curColTone = 0;
                     colRatioMinDB = true;
                 }
             } 
             else if(curStrongCol == str_1336){
-                if((str_1336/str_1209 >= SIX_DB) && (str_1336/str_1477 >= SIX_DB) && (str_1336/str_1633 >= SIX_DB)){
+                if(check_SIX_DB(str_1336, str_1209, str_1477, str_1633)){
                     curColTone = 1;
                     colRatioMinDB = true;
                 }
             } 
             else if(curStrongCol == str_1477){
-                if((str_1477/str_1209 >= SIX_DB) && (str_1477/str_1336 >= SIX_DB) && (str_1477/str_1633 >= SIX_DB)){
+                if(check_SIX_DB(str_1477, str_1209, str_1336, str_1633)){
                     curColTone = 2;
                     colRatioMinDB = true;
                 }
             } 
             else { // str_1633
-                if((str_1633/str_1209 >= SIX_DB) && (str_1633/str_1336 >= SIX_DB) && (str_1633/str_1477 >= SIX_DB)){
+                if(check_SIX_DB(str_1633, str_1209, str_1336, str_1477)){
                     curColTone = 3;
                     colRatioMinDB = true;
                 }
@@ -265,7 +266,10 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
                 else{
                     uint8_t *curToneChar = *dtmf_symbol_names;
                     curToneChar += (prevRowTone + prevColTone);
-                    fprintf(events_out, "%i\t%i\t%c\n", startIdx, endIdx, *curToneChar);
+                    double blockLen = (double)(endIdx - startIdx);
+                    if(blockLen/8000.0 >= MIN_DTMF_DURATION){
+                        fprintf(events_out, "%i\t%i\t%c\n", startIdx, endIdx, *curToneChar);
+                    }
                     prevRowTone = curRowTone;
                     prevColTone = curColTone;
                     startIdx = curIdx - N;
@@ -281,6 +285,10 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
     }
     
     return EOF;
+}
+
+int check_SIX_DB(double mainStr, double str1, double str2, double str3){
+    return((mainStr/str1 >= SIX_DB) && (mainStr/str2 >= SIX_DB) && (mainStr/str3 >= SIX_DB));
 }
 
 /**
@@ -324,7 +332,7 @@ int validargs(int argc, char **argv)
         return EOF;
     }
     if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
-        printf("INVALID COMMAND \n");
+        // printf("INVALID COMMAND \n");
         return EOF;
     }
     tempArgv++;
@@ -344,7 +352,7 @@ int validargs(int argc, char **argv)
         // DONE: Generate mode
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
-                printf("INVALID COMMAND \n");
+                // printf("INVALID COMMAND \n");
                 return EOF;
             }
             tempArgv++;
@@ -356,13 +364,13 @@ int validargs(int argc, char **argv)
                 tFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
-                    printf("INVALID VALUE for -t \n");
+                    // printf("INVALID VALUE for -t \n");
                     return EOF;
                 }
                 tempArgv++;
-                if(currVal < 0 || currVal > MAX_MSEC){
-                    printf("%li \n", currVal);
-                    printf("T Flag Value Out of Range \n");
+                if(currVal < 0 || currVal > 268435455){
+                    // printf("%li \n", currVal);
+                    // printf("T Flag Value Out of Range \n");
                     return EOF;
                 }
                 temp_audio_samples = currVal*8; // 8 samples every MSEC
@@ -372,12 +380,12 @@ int validargs(int argc, char **argv)
                 lFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
-                    printf("INVALID VALUE for -l \n");
+                    // printf("INVALID VALUE for -l \n");
                     return EOF;
                 }
                 tempArgv++;
                 if(currVal < -30 || currVal > 30){
-                    printf("L Flag Value Out of Range \n");
+                    // printf("L Flag Value Out of Range \n");
                     return EOF;
                 }      
                 temp_noise_level = currVal;
@@ -395,13 +403,13 @@ int validargs(int argc, char **argv)
                 }
                 tempArgv++;
                 if(noiseFileLen < 4){
-                    printf("Filename too short \n");
+                    // printf("Filename too short \n");
                     return EOF;
                 }
                 
             } else {
                 // Invalid flag
-                printf("INVALID FLAG(S) \n");
+                // printf("INVALID FLAG(S) \n");
                 return EOF;
             }
         }
@@ -433,7 +441,7 @@ int validargs(int argc, char **argv)
         // DONE: Detect mode
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
-                printf("INVALID COMMAND \n");
+                // printf("INVALID COMMAND \n");
                 return EOF;
             }
             tempArgv++;
@@ -445,13 +453,13 @@ int validargs(int argc, char **argv)
                 bFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
-                    printf("INVALID VALUE for -b \n");
+                    // printf("INVALID VALUE for -b \n");
                     return EOF;
                 }
                 tempArgv++;
                 if(currVal < 10 || currVal > 1000){
-                    printf("%li \n", currVal);
-                    printf("B Flag Value Out of Range \n");
+                    // printf("%li \n", currVal);
+                    // printf("B Flag Value Out of Range \n");
                     // TODO: unset_global_vars(); To unset all variables if errors encountered
                     return EOF;
                 }
@@ -459,7 +467,7 @@ int validargs(int argc, char **argv)
                 // printf("B FLAG");
             } else {
                 // Invalid flag
-                printf("INVALID FLAG \n");
+                // printf("INVALID FLAG \n");
                 return EOF;
             }
         }
@@ -488,7 +496,7 @@ int validargs(int argc, char **argv)
         return 0;
     } else {
         /*Invalid first flag*/
-        printf("INVALID FLAG \n");
+        // printf("INVALID FLAG \n");
         return EOF;
     }
 
@@ -561,9 +569,7 @@ int string_copy(char *src, char *dest){
     char *retPtr = dest;
     uint64_t srcLen = 0;
     while(*src != '\0'){
-        printf("Test 1 \n");
         *dest = 'a';
-        printf("Test 2 \n");
         *src = 'b';
         dest++;
         src++;
@@ -572,7 +578,7 @@ int string_copy(char *src, char *dest){
 
     // *dest = '\0'; //End string
     dest -= srcLen;
-    printf("%p \n", dest);
+    // printf("%p \n", dest);
     if(srcLen < 4){
         return EOF;
     }

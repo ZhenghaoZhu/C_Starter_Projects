@@ -20,17 +20,11 @@ int audio_read_header(FILE *in, AUDIO_HEADER *hp) {
 
     // NOTE: data_offset for writing into will always be 24. When reading, it can be varied.    
     hp->magic_number = traverse_audio_file_header(curFile);
-    // printf("Magic Number: %i \n", hp->magic_number);
     hp->data_offset = traverse_audio_file_header(curFile);
-    // printf("Data Offset: %i \n", hp->data_offset);
     hp->data_size = traverse_audio_file_header(curFile);
-    // printf("Data Size: %i \n", hp->data_size);
     hp->encoding = traverse_audio_file_header(curFile);
-    // printf("Encoding: %i \n", hp->encoding);
     hp->sample_rate = traverse_audio_file_header(curFile);
-    // printf("Sample Rate: %i \n", hp->sample_rate);
     hp->channels = traverse_audio_file_header(curFile);
-    // printf("Channels: %i \n", hp->channels);
 
     if(!check_audio_header(hp->magic_number, hp->data_offset, hp->data_size, hp->encoding, hp->sample_rate, hp->channels)){
         printf("AUDIO HEADER CHECK NOT PASSED! \n");
@@ -88,7 +82,6 @@ int audio_read_sample(FILE *in, int16_t *samplep) {
     if((curHex = fgetc(curFile)) != EOF){
         fullHex ^= curHex;
     } else {
-        printf("EOF \n");
         return EOF;
     }
 
