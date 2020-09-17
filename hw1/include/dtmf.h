@@ -9,7 +9,7 @@
 #define NUM_DTMF_ROW_FREQS 4
 #define NUM_DTMF_COL_FREQS 4
 
-#define MAX_MSEC 268435455 // 2,147,483,647/8
+#define MAX_MSEC 268435455 // INT32_MAX/8
 
 /*
  * Table of DTMF frequencies, in Hz.

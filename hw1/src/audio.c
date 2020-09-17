@@ -9,7 +9,7 @@ int helper_audio_write_header(FILE *out, uint32_t curVar);
 
 int audio_read_header(FILE *in, AUDIO_HEADER *hp) {
     FILE* curFile;
-    
+    int headerOffset = 0;
     // curFile = fopen("rsrc/941Hz_1sec.au", "r"); // Open file for only reading, return NULL if file doesn't exist
     if(in == NULL){
         printf("File inputted is NULL, please run program again and input correct absolute file path. \n");
@@ -36,11 +36,14 @@ int audio_read_header(FILE *in, AUDIO_HEADER *hp) {
         printf("AUDIO HEADER CHECK NOT PASSED! \n");
         return EOF;
     }
+    
+    headerOffset = hp->data_offset - 24;
+    for(int i = 0; i < headerOffset; i++){
+        fgetc(curFile); // Offsetting to end of annotation (if there is one)
+    }
 
     
     // closes the file pointed by demo 
-    fclose(curFile);
-    printf("AUDIO HEADER CHECK PASSED! \n");
     return 0; 
     // return EOF;
 }
@@ -76,6 +79,7 @@ int audio_read_sample(FILE *in, int16_t *samplep) {
         fullHex ^= curHex;
         fullHex = fullHex << 8;
     } else {
+        *samplep = -1;
         return EOF;
     }
 
@@ -106,7 +110,7 @@ int audio_write_sample(FILE *out, int16_t sample) {
 }
 
 int traverse_audio_file_header(FILE *curFile){
-    uint8_t curHex = 0x0;
+    uint32_t curHex = 0x0;
     uint32_t fullHex = 0x0;
     
     curHex = fgetc(curFile);

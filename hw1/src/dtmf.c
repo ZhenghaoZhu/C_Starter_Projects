@@ -26,7 +26,7 @@ int get_current_flag(char *flagPtr, char *frstChar, char *scndChar);
 int get_current_value(char *valPtr, long *currVal);
 int string_copy(char *src, char *dest);
 int check_string_equality(char *string_one, char *string_two);
-int get_file_header(FILE *file);
+double getMax(double d1, double d2);
 
 /*
  * You may modify this file and/or move the functions contained here
@@ -54,7 +54,7 @@ int get_file_header(FILE *file);
  *
  *  @param events_in  Stream from which to read DTMF events.
  *  @param audio_out  Stream to which to write audio header and sample data.
- *  @param length  Number of audio samples to be written.
+ *  @param length  Number of audio samples to be written. (length = -t (val) * 8)
  *  @return 0 if the header and specified number of samples are written successfully,
  *  EOF otherwise.
  */
@@ -90,6 +90,196 @@ int dtmf_generate(FILE *events_in, FILE *audio_out, uint32_t length) {
  */
 int dtmf_detect(FILE *audio_in, FILE *events_out) {
     // TO BE IMPLEMENTED
+    AUDIO_HEADER ah;
+    
+    if(audio_read_header(audio_in, &ah) == EOF){
+        return EOF;
+    }
+
+    int *freqPtr = dtmf_freqs;
+    int R = 8000;
+    int curBlockSize = 0;
+    uint32_t N = block_size;
+    int16_t startIdx = 0;
+    int16_t endIdx = 0;
+    int16_t prevStartIdx = -1;
+    int16_t prevEndIdx = -1;
+    int16_t curIdx = 0;
+    double curK = 0.0;
+    int prevRowTone = -1;
+    int prevColTone = -1;
+    int curRowTone = -1;
+    int curColTone = -1;
+    bool EOF_NOT_FOUND = true;
+    
+    while(EOF_NOT_FOUND){
+        GOERTZEL_STATE gs_697, gs_770, gs_852, gs_941, gs_1209, gs_1336, gs_1477, gs_1633;
+        
+        curK = (((double)*freqPtr) * N)/R; // K = (F * N)/R
+        freqPtr++;
+        goertzel_init(&gs_697, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_770, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_852, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_941, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_1209, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_1336, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_1477, N, curK);
+        
+        curK = (((double)*freqPtr) * N)/R;
+        freqPtr++;
+        goertzel_init(&gs_1633, N, curK);
+
+        freqPtr = dtmf_freqs;
+        int16_t curX = 0;
+        double doubleCurX = 0.0;
+        
+        for(int i = 0; i < (N - 1); i++){
+            curBlockSize++;
+            audio_read_sample(audio_in, &curX);
+            if(curX == -1){
+                EOF_NOT_FOUND = false;
+                // curIdx -= N;
+                break;
+            }
+            // Check for -1
+            doubleCurX = (double)curX;
+            doubleCurX /= INT16_MAX;
+            // printf("Val #%i: %lf \n", i, doubleCurX);
+            // Do all steps at the same time with curX
+            goertzel_step(&gs_697, doubleCurX);
+            goertzel_step(&gs_770, doubleCurX);
+            goertzel_step(&gs_852, doubleCurX);
+            goertzel_step(&gs_941, doubleCurX);
+
+            goertzel_step(&gs_1209, doubleCurX);
+            goertzel_step(&gs_1336, doubleCurX);
+            goertzel_step(&gs_1477, doubleCurX);
+            goertzel_step(&gs_1633, doubleCurX);
+        }
+
+        if(curBlockSize < (N - 1)){
+            break;
+        } 
+        else {
+            // Goertzel Strength
+            curBlockSize = 0;
+            curIdx += N;
+            curBlockSize++;
+            audio_read_sample(audio_in, &curX);
+            doubleCurX = (double)curX;
+            doubleCurX /= INT16_MAX;
+            double str_697, str_770, str_852, str_941, str_1209, str_1336, str_1477, str_1633;
+            
+            str_697 = goertzel_strength(&gs_697, doubleCurX);
+            str_770 = goertzel_strength(&gs_770, doubleCurX);
+            str_852 = goertzel_strength(&gs_852, doubleCurX);
+            str_941 = goertzel_strength(&gs_941, doubleCurX);
+
+            str_1209 = goertzel_strength(&gs_1209, doubleCurX);
+            str_1336 = goertzel_strength(&gs_1336, doubleCurX);
+            str_1477 = goertzel_strength(&gs_1477, doubleCurX);
+            str_1633 = goertzel_strength(&gs_1633, doubleCurX);
+
+            double curStrongRow = getMax(getMax(str_697, str_770), getMax(str_852, str_941));
+            double curStrongCol = getMax(getMax(str_1209, str_1336), getMax(str_1477, str_1633));
+            bool rowRatioMinDB = false;
+            bool colRatioMinDB = false;
+            
+            if(curStrongRow == str_697){
+                if((str_697/str_770 >= SIX_DB) && (str_697/str_852 >= SIX_DB) && (str_697/str_941 >= SIX_DB)){
+                    curRowTone = 0;
+                    rowRatioMinDB = true;
+                }
+            } 
+            else if(curStrongRow == str_770){
+                if((str_770/str_697 >= SIX_DB) && (str_770/str_852 >= SIX_DB) && (str_770/str_941 >= SIX_DB)){
+                    curRowTone = 4;
+                    rowRatioMinDB = true;
+                }
+            } 
+            else if(curStrongRow == str_852){
+                if((str_852/str_697 >= SIX_DB) && (str_852/str_770 >= SIX_DB) && (str_852/str_941 >= SIX_DB)){
+                    curRowTone = 8;
+                    rowRatioMinDB = true;
+                }
+            } 
+            else { // str_941
+                if((str_941/str_697 >= SIX_DB) && (str_941/str_770 >= SIX_DB) && (str_941/str_852 >= SIX_DB)){
+                    curRowTone = 12;
+                    rowRatioMinDB = true;
+                }
+            }
+
+            if(curStrongCol == str_1209){
+                if((str_1209/str_1336 >= SIX_DB) && (str_1209/str_1477 >= SIX_DB) && (str_1209/str_1633 >= SIX_DB)){
+                    curColTone = 0;
+                    colRatioMinDB = true;
+                }
+            } 
+            else if(curStrongCol == str_1336){
+                if((str_1336/str_1209 >= SIX_DB) && (str_1336/str_1477 >= SIX_DB) && (str_1336/str_1633 >= SIX_DB)){
+                    curColTone = 1;
+                    colRatioMinDB = true;
+                }
+            } 
+            else if(curStrongCol == str_1477){
+                if((str_1477/str_1209 >= SIX_DB) && (str_1477/str_1336 >= SIX_DB) && (str_1477/str_1633 >= SIX_DB)){
+                    curColTone = 2;
+                    colRatioMinDB = true;
+                }
+            } 
+            else { // str_1633
+                if((str_1633/str_1209 >= SIX_DB) && (str_1633/str_1336 >= SIX_DB) && (str_1633/str_1477 >= SIX_DB)){
+                    curColTone = 3;
+                    colRatioMinDB = true;
+                }
+            }
+
+            // Referencing Piazza Post #161, Checking if current block has DTMF tone
+            if((curStrongRow + curStrongCol >= MINUS_20DB) && (curStrongRow/curStrongCol >= FOUR_DB * 0.01) && (curStrongRow/curStrongCol <= FOUR_DB) && rowRatioMinDB && colRatioMinDB){
+                if(prevRowTone == -1 && prevColTone == -1){
+                    prevRowTone = curRowTone;
+                    prevColTone = curColTone;
+                }
+                else if(curRowTone == prevRowTone && curColTone == prevColTone){ // Same DTMF tone in this block, extend block
+                    endIdx = curIdx;
+                }
+                else{
+                    uint8_t *curToneChar = *dtmf_symbol_names;
+                    curToneChar += (prevRowTone + prevColTone);
+                    fprintf(events_out, "%i\t%i\t%c\n", startIdx, endIdx, *curToneChar);
+                    prevRowTone = curRowTone;
+                    prevColTone = curColTone;
+                    startIdx = curIdx - N;
+                    endIdx = curIdx;
+                }
+            }
+        }
+    }
+    if(endIdx > 0){
+        uint8_t *curToneChar = *dtmf_symbol_names;
+        curToneChar += (curRowTone + curColTone);
+        fprintf(events_out, "%i\t%i\t%c\n", startIdx, endIdx, *curToneChar);
+    }
+    
     return EOF;
 }
 
@@ -131,11 +321,11 @@ int validargs(int argc, char **argv)
 
     /*Too few arguments*/
     if(argc < 2){
-        return -1;
+        return EOF;
     }
     if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
         printf("INVALID COMMAND \n");
-        return -1;
+        return EOF;
     }
     tempArgv++;
 
@@ -145,10 +335,6 @@ int validargs(int argc, char **argv)
         return 0;
     }
 
-    // /*Too many arguments*/
-    // if(argc > 8){
-    //     return -1;
-    // }
 
     /*Check first flag*/
     if(frstChar == '-' && scndChar == 'g'){
@@ -159,25 +345,25 @@ int validargs(int argc, char **argv)
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
                 printf("INVALID COMMAND \n");
-                return -1;
+                return EOF;
             }
             tempArgv++;
             if(frstChar != '-'){
                 // Wrong flag character
-                return -1;
+                return EOF;
             } else if (scndChar == 't' && !tFlagSeen){
                 // DONE: Check if nexr value is and int and valid based on range [0, UNIT32_MAX]
                 tFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -t \n");
-                    return -1;
+                    return EOF;
                 }
                 tempArgv++;
                 if(currVal < 0 || currVal > MAX_MSEC){
                     printf("%li \n", currVal);
                     printf("T Flag Value Out of Range \n");
-                    return -1;
+                    return EOF;
                 }
                 temp_audio_samples = currVal*8; // 8 samples every MSEC
                 // printf("T FLAG \n");
@@ -187,12 +373,12 @@ int validargs(int argc, char **argv)
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -l \n");
-                    return -1;
+                    return EOF;
                 }
                 tempArgv++;
                 if(currVal < -30 || currVal > 30){
                     printf("L Flag Value Out of Range \n");
-                    return -1;
+                    return EOF;
                 }      
                 temp_noise_level = currVal;
                 // printf("L FLAG \n");        
@@ -210,13 +396,13 @@ int validargs(int argc, char **argv)
                 tempArgv++;
                 if(noiseFileLen < 4){
                     printf("Filename too short \n");
-                    return -1;
+                    return EOF;
                 }
                 
             } else {
                 // Invalid flag
                 printf("INVALID FLAG(S) \n");
-                return -1;
+                return EOF;
             }
         }
         if(temp_audio_samples != -1){
@@ -248,33 +434,33 @@ int validargs(int argc, char **argv)
         for(i = 2; i < argc; i++){
             if(get_current_flag(*tempArgv, &frstChar, &scndChar) > 3){
                 printf("INVALID COMMAND \n");
-                return -1;
+                return EOF;
             }
             tempArgv++;
             if(frstChar != '-'){
                 // Wrong flag character
-                return -1;
+                return EOF;
             } else if (scndChar == 'b' && !bFlagSeen){
                 // DONE: Check if nexr value is and int and valid based on range [10, 1000]
                 bFlagSeen = true;
                 i++;
                 if(!(get_current_value(*tempArgv, &currVal))){
                     printf("INVALID VALUE for -b \n");
-                    return -1;
+                    return EOF;
                 }
                 tempArgv++;
                 if(currVal < 10 || currVal > 1000){
                     printf("%li \n", currVal);
                     printf("B Flag Value Out of Range \n");
                     // TODO: unset_global_vars(); To unset all variables if errors encountered
-                    return -1;
+                    return EOF;
                 }
                 temp_block_size = currVal;
                 // printf("B FLAG");
             } else {
                 // Invalid flag
                 printf("INVALID FLAG \n");
-                return -1;
+                return EOF;
             }
         }
         if(temp_audio_samples != -1){
@@ -303,7 +489,7 @@ int validargs(int argc, char **argv)
     } else {
         /*Invalid first flag*/
         printf("INVALID FLAG \n");
-        return -1;
+        return EOF;
     }
 
 }
@@ -314,21 +500,17 @@ int check_string_equality(char *string_one, char *string_two)
     for(;;){
         if(*string_one == '\0' || *string_two == '\0'){
             if(*string_one != '\0'){
-                printf("NOT EQUAL \n");
-                return -1;
+                return EOF;
             }
             else if(*string_two != '\0'){
-                printf("NOT EQUAL \n");
-                return -1;
+                return EOF;
             }
             else {
-                printf("Strings are equal \n");
                 return 0;
             }
         }
         if(*string_one != *string_two){
-            printf("NOT EQUAL \n");
-            return -1;
+            return EOF;
         }
         string_one++;
         string_two++;
@@ -355,6 +537,11 @@ int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
 
 int get_current_value(char *valPtr, long *currVal){
     *currVal = 0;
+
+    if(valPtr == NULL){
+        return 0;
+    }
+
     while(*valPtr != '\0'){
         if((int)(*valPtr) > 57 || (int)(*valPtr) < 48){
             return 0;
@@ -369,7 +556,7 @@ int get_current_value(char *valPtr, long *currVal){
 
 int string_copy(char *src, char *dest){
     if(dest == NULL){
-        return -1;
+        return EOF;
     }
     char *retPtr = dest;
     uint64_t srcLen = 0;
@@ -387,50 +574,17 @@ int string_copy(char *src, char *dest){
     dest -= srcLen;
     printf("%p \n", dest);
     if(srcLen < 4){
-        return -1;
+        return EOF;
     }
     return srcLen;
 }
 
-int get_file_header(FILE *file){
-    FILE* curFile;
-    int8_t display;
-    uint32_t count = 0;
-    // curFile = fopen("rsrc/941Hz_1sec.au", "r"); // Open file for only reading, return NULL if file doesn't exist
-    curFile = file;
-    if(curFile == NULL){
-        printf("File inputted is NULL, please run program again and input correct absolute file path. \n");
-        return -1;
+double getMax(double d1, double d2){
+    if(d1 > d2){
+        return d1;
     }
-    while (1) { 
-        // reading file 
-        display = fgetc(curFile); 
-  
-        // end of file indicator 
-        if (feof(curFile)) 
-            break; 
-  
-        // displaying every characters
-        if(display == 0){
-            printf("00 ");
-        }
-        else if(display < 16){
-            printf("0%x ", display);
-        }
-        else {
-            printf("%x ", display);
-        }
-
-        count++;
-        if(count >= 16){
-            printf("\n");
-            count = 0;
-        } 
-    } 
-  
-    // closes the file pointed by demo 
-    fclose(curFile); 
-    return 0;
-    // TODO: Look more into when to call detect mode 
-    // TODO: Look into when to call functions in audio.c 
+    else {
+        return d2;
+    }
 }
+

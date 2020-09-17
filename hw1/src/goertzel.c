@@ -4,6 +4,12 @@
 #include "debug.h"
 #include "goertzel.h"
 
+typedef struct complex_pair {
+    double real;
+    double imag;
+} COMPLEX_PAIR;
+
+
 void goertzel_init(GOERTZEL_STATE *gp, uint32_t N, double k) {
     // TO BE IMPLEMENTED
     gp->A = (2 * M_PI) * (k/N);
@@ -14,6 +20,14 @@ void goertzel_init(GOERTZEL_STATE *gp, uint32_t N, double k) {
     gp->s1 = 0;
     gp->s2 = 0;
 
+    // printf("%f\n", gp -> A);
+    // printf("%f\n", gp -> B);
+    // printf("%d\n", gp -> N);
+    // printf("%f\n", gp -> k);
+    // printf("%f\n", gp -> s0);
+    // printf("%f\n", gp -> s1);
+    // printf("%f\n\n", gp -> s2);
+    
     return;
 }
 
@@ -38,6 +52,14 @@ double goertzel_strength(GOERTZEL_STATE *gp, double x) {
     double y_B;
     double y_C;
     double y_D;
+
+    // printf("%f\n", gp -> A);
+    // printf("%f\n", gp -> B);
+    // printf("%d\n", gp -> N);
+    // printf("%f\n", gp -> k);
+    // printf("%f\n", gp -> s0);
+    // printf("%f\n", gp -> s1);
+    // printf("%f\n\n", gp -> s2);
 
     constant_c.real = cos(gp->A);
     constant_c.imag = -1.0  * sin(gp->A);
