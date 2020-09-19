@@ -109,7 +109,6 @@ int dtmf_generate(FILE *events_in, FILE *audio_out, uint32_t length) {
         noise_file_available = true;
     }
     get_noise_w(&noise_w);
-    debug("NOISE W: %lf \n", noise_w);
 
     while(fgets(line_buf, LINE_BUF_SIZE, events_in) != NULL){
         strLineBuf = line_buf;
@@ -175,7 +174,7 @@ int dtmf_generate(FILE *events_in, FILE *audio_out, uint32_t length) {
         prevEndIdx = curEndIdx;
         
     }
-    debug("CURDATSZ: %i prevEndIdx: %i \n", curDataSz, prevEndIdx);
+    
     curDataSz /= 2;
     for(int i = prevEndIdx; i < curDataSz ; i++){
         truncCurSample = 0;
