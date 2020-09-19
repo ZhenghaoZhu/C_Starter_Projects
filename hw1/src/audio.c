@@ -37,9 +37,7 @@ int audio_read_header(FILE *in, AUDIO_HEADER *hp) {
     }
 
     
-    // closes the file pointed by demo 
     return 0; 
-    // return EOF;
 }
 
 int audio_write_header(FILE *out, AUDIO_HEADER *hp) {

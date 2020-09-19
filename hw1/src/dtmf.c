@@ -28,6 +28,9 @@ int string_copy(char *src, char *dest);
 int check_string_equality(char *string_one, char *string_two);
 double getMax(double d1, double d2);
 int check_SIX_DB(double mainStr, double str1, double str2, double str3);
+int get_txt_idx(char *valPtr, int *currVal);
+int getCurFreqColRow(char curDTMF, double *curStrRow, double *curStrCol);
+void get_noise_w(double *noise_w);
 
 /*
  * You may modify this file and/or move the functions contained here
@@ -61,7 +64,129 @@ int check_SIX_DB(double mainStr, double str1, double str2, double str3);
  */
 int dtmf_generate(FILE *events_in, FILE *audio_out, uint32_t length) {
     // TO BE IMPLEMENTED
-    return EOF;
+
+    // Check for noise file avaialilibyt
+    // Write header into audio_out
+    FILE *noisePtr;
+    if(noise_file != NULL){
+        noisePtr = fopen(noise_file, "r");
+        if(noisePtr == NULL){
+            debug("Provided file doesn't exist \n");
+            return EOF;
+        }
+    }
+    // #define LINE_BUF_SIZE 80
+    // char line_buf[LINE_BUF_SIZE];
+    AUDIO_HEADER ah;
+    ah.magic_number = AUDIO_MAGIC;
+    ah.data_offset = AUDIO_DATA_OFFSET;
+    ah.data_size =  length * 2; //  NOTE: data_size = -t val * 8 * 2 
+    ah.encoding = PCM16_ENCODING;
+    ah.sample_rate = AUDIO_FRAME_RATE;
+    ah.channels = AUDIO_CHANNELS;
+    audio_write_header(audio_out, &ah);
+
+    int curDataSz = ah.data_size; // For padding ending, if necessary
+    int prevStrIdx = -1;
+    int prevEndIdx = -1;
+    int curStrIdx = 0;
+    int curEndIdx = 0;
+    int16_t truncCurSample = 0;
+    int16_t curNoiseSample = 0;
+    double dcurNoiseSample = 0.0;
+    double curStrRow = 0.0;
+    double curStrCol = 0.0;
+    double dcurSample = -1.0;
+    double noise_w = 0.0;
+    char *strLineBuf = line_buf;
+    char curDTMF = 'z';
+    int buffOffset = 0;
+    bool noise_file_available = false;
+    bool prevValChangeOnce = true;
+    FILE *noise_file_p;
+    noise_file_p = fopen(noise_file, "r");
+    if(noise_file_p != NULL){
+        noise_file_available = true;
+    }
+    get_noise_w(&noise_w);
+    debug("NOISE W: %lf \n", noise_w);
+
+    while(fgets(line_buf, LINE_BUF_SIZE, events_in) != NULL){
+        strLineBuf = line_buf;
+        buffOffset = get_txt_idx(strLineBuf, &curStrIdx) + 1;
+        strLineBuf += buffOffset;
+        buffOffset = get_txt_idx(strLineBuf, &curEndIdx) + 1;
+        strLineBuf += buffOffset;
+        curDTMF = *strLineBuf;
+        getCurFreqColRow(curDTMF, &curStrRow, &curStrCol);
+
+        if(curEndIdx < curStrIdx){
+            return EOF;
+        }
+        if(prevStrIdx != -1 && prevEndIdx != -1){
+            if(curStrIdx < prevEndIdx){
+                return EOF;
+            }
+        } else if(prevValChangeOnce && curStrIdx > 0){
+            prevStrIdx = 0;
+            prevEndIdx = 0;
+            prevValChangeOnce = false;
+        }  
+
+        // Padding for between gaps in txt file start and end index
+        if(prevStrIdx != -1 && prevEndIdx != -1){
+            for(int i = prevEndIdx; i < curStrIdx; i++){
+                if(noise_file_available){
+                    audio_read_sample(noise_file_p, &curNoiseSample);
+                    dcurNoiseSample = ((double)curNoiseSample) * noise_w;
+                    dcurSample = 0.0 * (1.0 - noise_w) + dcurNoiseSample * (noise_w);
+                    dcurSample *= INT16_MAX;
+                    truncCurSample = trunc(dcurSample);
+                    audio_write_sample(audio_out, truncCurSample);
+                }
+                else {
+                    truncCurSample = 0;
+                    audio_write_sample(audio_out, truncCurSample);
+                }
+            }
+        }
+            
+
+        // Write actual DTMF stuff
+        for(int i = curStrIdx; i < curEndIdx; i++){
+            if(noise_file_available){
+                audio_read_sample(noise_file_p, &curNoiseSample);
+                dcurNoiseSample = ((double)curNoiseSample) * noise_w;
+                dcurSample = (cos((2.0 * M_PI * curStrRow * i) / AUDIO_FRAME_RATE ) * 0.5) + (cos((2.0 * M_PI * curStrCol * i) / AUDIO_FRAME_RATE ) * 0.5);
+                dcurSample = dcurSample * (1.0 - noise_w) + dcurNoiseSample * (noise_w);
+                dcurSample *= INT16_MAX;
+                truncCurSample = trunc(dcurSample);
+                audio_write_sample(audio_out, truncCurSample);
+            }
+            else {
+                dcurSample = (cos((2.0 * M_PI * curStrRow * i) / AUDIO_FRAME_RATE ) * 0.5) + (cos((2.0 * M_PI * curStrCol * i) / AUDIO_FRAME_RATE ) * 0.5);
+                dcurSample *= INT16_MAX;
+                truncCurSample = trunc(dcurSample);
+                audio_write_sample(audio_out, truncCurSample);
+            }
+        }
+
+        prevStrIdx = curStrIdx;
+        prevEndIdx = curEndIdx;
+        
+    }
+    debug("CURDATSZ: %i prevEndIdx: %i \n", curDataSz, prevEndIdx);
+    curDataSz /= 2;
+    for(int i = prevEndIdx; i < curDataSz ; i++){
+        truncCurSample = 0;
+        audio_write_sample(audio_out, truncCurSample);
+    }
+
+    if(noise_file_available){
+        fclose(noise_file_p);
+    }
+
+    return 0;
 }
 
 /**
@@ -284,7 +409,7 @@ int dtmf_detect(FILE *audio_in, FILE *events_out) {
         fprintf(events_out, "%i\t%i\t%c\n", startIdx, endIdx, *curToneChar);
     }
     
-    return EOF;
+    return 0;
 }
 
 int check_SIX_DB(double mainStr, double str1, double str2, double str3){
@@ -373,7 +498,7 @@ int validargs(int argc, char **argv)
                     // printf("T Flag Value Out of Range \n");
                     return EOF;
                 }
-                temp_audio_samples = currVal*8; // 8 samples every MSEC
+                temp_audio_samples = currVal; // 8 samples every MSEC
                 // printf("T FLAG \n");
             } else if (scndChar == 'l' && !lFlagSeen){
                 // DONE: Check if nexr value is and int and valid based on range [-30, 30]
@@ -545,20 +670,28 @@ int get_current_flag(char *flagPtr, char *frstChar, char *scndChar){
 
 int get_current_value(char *valPtr, long *currVal){
     *currVal = 0;
-
+    int negValue = 1;
     if(valPtr == NULL){
         return 0;
     }
 
     while(*valPtr != '\0'){
-        if((int)(*valPtr) > 57 || (int)(*valPtr) < 48){
+        if((int)(*valPtr) == 45){
+            negValue = -1;
+            valPtr++;
+        }
+        else if((int)(*valPtr) > 57 || (int)(*valPtr) < 48){
             return 0;
         }
-        *currVal += ((long)(*valPtr) - 48);
-        *currVal *= 10;
-        valPtr++;
+        else {
+            *currVal += ((long)(*valPtr) - 48);
+            *currVal *= 10;
+            valPtr++;
+        }
+        
     }
     *currVal /= 10;
+    *currVal *= negValue;
     return 1;
 }
 
@@ -594,3 +727,121 @@ double getMax(double d1, double d2){
     }
 }
 
+int get_txt_idx(char *valPtr, int *currVal){
+    *currVal = 0;
+    int count = 0;
+    if(valPtr == NULL){
+        return 0;
+    }
+
+    while(*valPtr != '\0' || *valPtr != '\t'){
+        if((int)(*valPtr) > 57 || (int)(*valPtr) < 48){
+            *currVal /= 10;
+            return count;
+        }
+        *currVal += ((int)(*valPtr) - 48);
+        *currVal *= 10;
+        valPtr++;
+        count++;
+    }
+    *currVal /= 10;
+    return count;
+}
+
+int getCurFreqColRow(char curDTMF, double *curStrRow, double *curStrCol){
+    switch(curDTMF) {
+
+        case '1' :
+            *curStrRow = 697.0;
+            *curStrCol = 1209.0;
+            break;
+            
+        case '2' :
+            *curStrRow = 697.0;
+            *curStrCol = 1336.0;
+            break;
+
+        case '3' :
+            *curStrRow = 697.0;
+            *curStrCol = 1477.0;
+            break;
+            
+        case 'A' :
+            *curStrRow = 697.0;
+            *curStrCol = 1633.0;
+            break;
+
+        case '4' :
+            *curStrRow = 770.0;
+            *curStrCol = 1209.0;
+            break;
+            
+        case '5' :
+            *curStrRow = 770.0;
+            *curStrCol = 1336.0;
+            break;
+
+        case '6' :
+            *curStrRow = 770.0;
+            *curStrCol = 1477.0;
+            break;
+            
+        case 'B' :
+            *curStrRow = 770.0;
+            *curStrCol = 1633.0;
+            break;
+            
+        case '7' :
+            *curStrRow = 852.0;
+            *curStrCol = 1209.0;
+            break;
+
+        case '8' :
+            *curStrRow = 852.0;
+            *curStrCol = 1336.0;
+            break;
+            
+        case '9' :
+            *curStrRow = 852.0;
+            *curStrCol = 1477.0;
+            break;
+
+        case 'C' :
+            *curStrRow = 852.0;
+            *curStrCol = 1633.0;
+            break;
+            
+        case '*' :
+            *curStrRow = 941.0;
+            *curStrCol = 1209.0;
+            break;
+
+        case '0' :
+            *curStrRow = 941.0;
+            *curStrCol = 1336.0;
+            break;
+            
+        case '#' :
+            *curStrRow = 941.0;
+            *curStrCol = 1477.0;
+            break;
+
+        case 'D' :
+            *curStrRow = 941.0;
+            *curStrCol = 1633.0;
+            break;
+        
+        default :
+            *curStrRow = 0.0;
+            *curStrCol = 0.0;
+            return 0;
+    }
+    
+    return 1;
+}
+
+void get_noise_w(double *noise_w){
+    double level_d = (double)noise_level;
+    *noise_w = (pow(10.0, (level_d/10.0)))/(1 + pow(10.0, (level_d/10.0)));
+    return;
+}

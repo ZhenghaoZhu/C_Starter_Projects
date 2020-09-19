@@ -36,7 +36,8 @@ Test(basecode_tests_suite, validargs_generate_test) {
 Test(basecode_tests_suite, validargs_generate_second_test) {
     char *nfile = "noise.au";
     int argc = 8;
-    char *argv[] = {"bin/dtmf", "-g", "-t", "999", "-l", "10", "-n", nfile, NULL};
+    int audio_samples_exp = 7992;
+    char *argv[] = {"bin/dtmf", "-g", "-t", "7992", "-l", "10", "-n", nfile, NULL};
     int ret = validargs(argc, argv);
     int exp_ret = 0;
     int opt = global_options;
@@ -49,8 +50,8 @@ Test(basecode_tests_suite, validargs_generate_second_test) {
 		 "Variable 'noise_file' was not properly set.  Got: %s | Expected: %s",
 		 noise_file, nfile);
     cr_assert_eq(audio_samples == 7992, 1,
-		 "Variable 'audio_samples' was not properly set.  Got: %s | Expected: %s",
-		 noise_file, nfile);
+		 "Variable 'audio_samples' was not properly set.  Got: %i | Expected: %i",
+		 audio_samples, audio_samples_exp);
     cr_assert_eq(noise_level == 10, 1,
 		 "Variable 'noise_level' was not properly set.  Got: %s | Expected: %s",
 		 noise_file, nfile);
