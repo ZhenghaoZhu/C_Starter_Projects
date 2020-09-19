@@ -32,10 +32,14 @@ int main(int argc, char **argv)
         USAGE(*argv, EXIT_SUCCESS);
     }
     else if(global_options & 2){
-        dtmf_generate(stdin, stdout, audio_samples * 8);
+        if(dtmf_generate(stdin, stdout, audio_samples * 8) == EOF){
+            return EXIT_FAILURE;
+        }
     }
     else if(global_options & 4){
-        dtmf_detect(stdin, stdout);
+        if(dtmf_detect(stdin, stdout) == EOF){
+            return EXIT_FAILURE;
+        }
     } 
     else {
         return EXIT_FAILURE;
