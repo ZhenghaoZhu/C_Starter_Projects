@@ -22,6 +22,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <malloc.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* parameters */
 #define MAXFN	120             /* max filename length */
@@ -40,7 +42,7 @@
 #define debug(X)
 #define OPTSTR	"lh"
 #endif
-#define SORT qsort((char *)filelist, n_files, sizeof(filedesc *), comp1);
+#define SORT qsort((char *)filelist, n_files, sizeof(filedesc *), (void *) comp1);
 #define GetFlag(x,f) ((filelist[x].flags & (f)) != 0)
 #define SetFlag(x,f) (filelist[x].flags |= (f))
 
@@ -78,7 +80,7 @@ static char *HelpMsg[] = {
 	"  -d - debug (must compile with DEBUG)"
 #endif /* ?DEBUG */
 };
-static HelpLen = sizeof(HelpMsg)/sizeof(char *);
+int HelpLen = sizeof(HelpMsg)/sizeof(char *);
 
 #ifndef	lint
 static char *SCCSid[] = {
@@ -87,17 +89,16 @@ static char *SCCSid[] = {
 };
 #endif
 
+extern int att_getopt(int argc, char **argv, char *opts);
 int comp1();					/* compare two filedesc's */
 void scan1();					/* make the CRC scan */
 void scan2();					/* do full compare if needed */
 void scan3();					/* print the results */
 unsigned long get_crc();		/* get crc32 on a file */
 char *getfn();					/* get a filename by index */
-
-int finddup_main(argc, argv)
-int argc;
-char *argv[];
-{
+int fullcmp();					/* compare two files, bit for bit */
+
+void finddup_main(int argc, char *argv[]) {
 	char curfile[MAXFN];
 	struct stat statbuf;
 	int ch;
@@ -147,11 +148,15 @@ char *argv[];
 	filelist = (filedesc *) malloc(50 * sizeof(filedesc));
 	if (filelist == NULL) {
 		perror("Can't start files vector");
+		debug(("First vector freed @ %08lx, size %lu bytes\n",
+			(long) filelist, 50*sizeof(filedesc)
+		));
+		free(filelist);
 		exit(1);
 	}
 	/* finish the pointers */
 	max_files = 50;
-	debug(("First vector allocated @ %08lx, size %d bytes\n",
+	debug(("First vector allocated @ %08lx, size %lu bytes\n",
 		(long) filelist, 50*sizeof(filedesc)
 	));
 	fprintf(stderr, "build list...");
@@ -166,6 +171,10 @@ char *argv[];
 				(filedesc *) realloc(filelist, (max_files)*sizeof(filedesc));
 			if (filelist == NULL) {
 				perror("Out of memory!");
+				debug(("First vector freed @ %08lx, size %lu bytes\n",
+					(long) filelist, 50*sizeof(filedesc)
+				));
+				free(filelist);
 				exit(1);
 			}
 			debug(("Got more memory!\n"));
@@ -197,7 +206,7 @@ char *argv[];
 		curptr->device = statbuf.st_dev;
 		curptr->inode = statbuf.st_ino;
 		curptr->flags = 0;
-		debug(("%cName[%d] %s, size %ld, inode %d\n",
+		debug(("%cName[%lu] %s, size %ld, inode %lu\n",
 			(firsttrace++ == 0 ? '\n' : '\r'), n_files, curfile,
 			(long) statbuf.st_size, statbuf.st_ino
 		));
@@ -220,7 +229,7 @@ char *argv[];
 #ifdef DEBUG
 	for (loc = 0; DebugFlg > 1 && loc < n_files; ++loc) {
 		curptr = filelist + loc;
-		printf("%8ld %08lx %6d %6d %02x\n",
+		printf("%8ld %08lx %lu %lu %02x\n",
 			curptr->length, curptr->crc32,
 			curptr->device, curptr->inode,
 			curptr->flags
@@ -230,30 +239,29 @@ char *argv[];
 
 	/* now scan and output dups */
 	scan3();
-
+	debug(("First vector freed @ %08lx, size %lu bytes\n",
+		(long) filelist, 50*sizeof(filedesc)
+	));
+	free(filelist);
 	exit(0);
 }
 
 /* comp1 - compare two values */
-int
-comp1(p1, p2)
-char *p1, *p2;
-{
+int comp1	(char *p1, char *p2){
 	register filedesc *p1a = (filedesc *)p1, *p2a = (filedesc *)p2;
 	register int retval;
 
-	(retval = p1a->length - p2a->length) ||
-	(retval = p1a->crc32 - p2a->crc32) ||
-	(retval = p1a->device - p2a->device) ||
-	(retval = p1a->inode - p2a->inode);
+	retval = p1a->length - p2a->length;
+	retval = p1a->crc32 - p2a->crc32;
+	retval = p1a->device - p2a->device;
+	retval = p1a->inode - p2a->inode;
 	
 	return retval;
 }
 
 /* scan1 - get a CRC32 for files of equal length */
 
-void
-scan1() {
+void scan1() {
 	FILE *fp;
 	int ix, needsort = 0;
 
@@ -277,8 +285,7 @@ scan1() {
 
 /* scan2 - full compare if CRC is equal */
 
-void
-scan2() {
+void scan2() {
 	int ix, ix2, lastix;
 	int inmatch;				/* 1st filename has been printed */
 	int need_hdr = 1;			/* Need a hdr for the hard link list */
@@ -310,7 +317,7 @@ scan2() {
 			}
 		}
 	}
-	debug(("\nStart dupscan"));
+	debug(("\nStart dupscan \n"));
 
 	/* now really scan for duplicates */
 	for (ix = 0; ix < n_files; ix = lastix) {
@@ -321,9 +328,7 @@ scan2() {
 				&& p1->crc32 == p2->crc32;
 			++ix2, ++p2
 		) {
-			if ((GetFlag(ix2, FL_LNK) && lnkmatch)
-				|| fullcmp(ix, ix2) == 0
-			) {
+			if ((GetFlag(ix2, FL_LNK) && lnkmatch) || fullcmp(ix, ix2) == 0) {
 				SetFlag(ix2, FL_DUP);
 				/* move if needed */
 				if (lastix != ix2) {
@@ -348,9 +353,7 @@ scan2() {
 
 /* scan3 - output dups */
 
-void
-scan3()
-{
+void scan3() {
 	register filedesc *p1, *p2;
 	int ix, ix2, inmatch, need_hdr = 1;
 	char *headfn;				/* pointer to the filename for sups */
@@ -384,10 +387,7 @@ scan3()
 
 /* get_crc - get a CRC32 for a file */
 
-unsigned long
-get_crc(ix)
-int ix;
-{
+unsigned long get_crc(int ix) {
 	FILE *fp;
 	register unsigned long val1 = 0x90909090, val2 = 0xeaeaeaea;
 	register int carry;
@@ -407,7 +407,7 @@ int ix;
 	/* build the CRC values */
 	while ((ch = fgetc(fp)) != EOF) {
 		carry = (val1 & 0x8000000) != 0;
-		val1 = (val1 << 1) ^ ch + carry;
+		val1 = (val1 << 1) ^ (ch + carry);
 		val2 += ch << (ch & 003);
 	}
 	debug(("v1: %08lx v2: %08lx ", val1, val2));
@@ -417,10 +417,7 @@ int ix;
 
 /* getfn - get filename from index */
 
-char *
-getfn(ix)
-off_t ix;
-{
+char * getfn(off_t ix) {
 	static char fnbuf[MAXFN];
 
 	fseek(namefd, filelist[ix].nameloc, 0);
@@ -432,10 +429,7 @@ off_t ix;
 
 /* fullcmp - compare two files, bit for bit */
 
-int
-fullcmp(v1, v2)
-int v1, v2;
-{
+int fullcmp(int v1, int v2) {
 	FILE *fp1, *fp2;
 	char filename[MAXFN];
 	register char ch;

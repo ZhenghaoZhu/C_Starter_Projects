@@ -21,10 +21,10 @@
  * The current SVR2 man page reflects the actual behavor of this getopt.
  * However, I am not about to post a copy of anything licensed by AT&T.
  */
-
-
+#include <string.h>
+#include "getopt.h"
 /*LINTLIBRARY*/
-#define NULL	0
+// #define NULL	0
 #define EOF	(-1)
 #define ERR(s, c)	if(opterr){\
 	extern int write();\
@@ -41,11 +41,7 @@ int	optind = 1;
 int	optopt;
 char	*optarg;
 
-int
-att_getopt(argc, argv, opts)
-int	argc;
-char	**argv, *opts;
-{
+int att_getopt(int argc, char **argv, char *opts) {
 	static int sp = 1;
 	register int c;
 	register char *cp;
