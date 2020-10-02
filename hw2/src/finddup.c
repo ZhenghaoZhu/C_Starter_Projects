@@ -191,7 +191,8 @@ char *argv[];
 			printf("%s\n", curfile);
 			continue;
 		}
-
+		
+		// Intialize whole struct
 		curptr = filelist + n_files++;
 		curptr->nameloc = loc;
 		curptr->length = statbuf.st_size;
@@ -246,7 +247,7 @@ char *p1, *p2;
 	register int retval;
 	int temp;
 
-	temp = ((retval = p1a->length - p2a->length) || (retval = p1a->crc32 - p2a->crc32) || (retval = p1a->device - p2a->device) || (retval = p1a->inode - p2a->inode));
+	temp = ((retval = p1a->length - p2a->length) || (retval = p1a->crc32 - p2a->crc32) || (retval = p1a->device - p2a->device) || (retval = p1a->inode - p2a->inode)); 
 	temp -= 0;
 	
 	return retval;
@@ -396,7 +397,7 @@ int ix;
 	FILE *fp;
 	register unsigned long val1 = 0x90909090, val2 = 0xeaeaeaea;
 	register int carry;
-	char ch;
+	int ch; // int to get -1 when EOF, char doesn't take negative values
 	char fname[MAXFN];
 
 	/* open the file */
