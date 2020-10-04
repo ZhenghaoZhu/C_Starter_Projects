@@ -24,8 +24,9 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
+#include <getopt.h>
 /* parameters */
-#define MAXFN	120             /* max filename length */
 
 /* constants */
 #define EOS		((char) '\0')	/* end of string */
@@ -88,20 +89,26 @@ static char *SCCSid[] = {
 };
 #endif
 
-int comp1(const void *p1, const void *p2);					/* compare two filedesc's */
-void scan1();												/* make the CRC scan */
-void scan2();												/* do full compare if needed */
-void scan3();												/* print the results */
-unsigned long get_crc(int ix);								/* get crc32 on a file */
-char * getfn(off_t ix);										/* get a filename by index */
-int fullcmp(int v1, int v2);								/* compare two files, bit for bit */
+int comp1();					/* compare two filedesc's */
+void scan1();					/* make the CRC scan */
+void scan2();					/* do full compare if needed */
+void scan3();					/* print the results */
+unsigned long get_crc();		/* get crc32 on a file */
+char *getfn();					/* get a filename by index */
+int fullcmp(int v1, int v2);	/* compare two files, bit for bit */
 
 // Other file functions (getopt.c)
 extern int att_getopt(int argc, char **argv, char *opts);
+extern uint32_t rc_crc32(uint32_t crc, const char *buf, size_t len);
 
 
-int finddup_main(int argc, char *argv[]) {
-	char curfile[MAXFN];
+int finddup_main(argc, argv)
+int argc;
+char *argv[];
+{
+	char *curfile = NULL;
+	size_t curfileLen = 0;
+	ssize_t readLine;
 	struct stat statbuf;
 	int ch;
 	int firsterr = 0;			/* flag on 1st error for format */
@@ -109,11 +116,40 @@ int finddup_main(int argc, char *argv[]) {
 	off_t loc;            		/* location of name in the file */
 	int zl_hdr = 1;				/* need header for zero-length files list */
 	filedesc *curptr;			/* pointer to current storage loc */
-	
+	int option_index = 0;
+	static struct option long_options[] = {
+		{"help",    no_argument, 0,  'h' },
+		{"no-links",  no_argument, 0, 'l'},
+		{"debug",     optional_argument, 0,  0},
+		{0, 0, 0, 0}
+	};
 	/* parse options, if any */
 	opterr = 0;
-	while ((ch = att_getopt(argc, argv, OPTSTR)) != EOF) {
+	while ((ch = getopt_long(argc, argv, OPTSTR, long_options, &option_index)) != -1) {
 		switch (ch) {
+		case 0:
+			#ifdef DEBUG
+			if(!strcmp(long_options[option_index].name, "debug")){
+				if(optarg){
+					DebugFlg = atoi(optarg);
+					break;
+				}
+				else {
+					DebugFlg++;
+					break;
+				}
+			}
+			#endif
+			if(!strcmp(long_options[option_index].name, "no-links")){
+				linkflag = 0;
+				break;
+			}
+			if(!strcmp(long_options[option_index].name, "help")){
+				for (ch = 0; ch < HelpLen; ++ch) {
+					printf("%s\n", HelpMsg[ch]);
+				}
+				exit(0);
+			}
 		case 'l': /* set link flag */
 			linkflag = 0;
 			break;
@@ -123,10 +159,16 @@ int finddup_main(int argc, char *argv[]) {
 			break;
 	#endif /* ?DEBUG */
 		case 'h': /* help */
+			for (ch = 0; ch < HelpLen; ++ch) {
+				printf("%s\n", HelpMsg[ch]);
+			}
+			exit(0);
 		case '?':
 			for (ch = 0; ch < HelpLen; ++ch) {
 				printf("%s\n", HelpMsg[ch]);
 			}
+			exit(1);
+		default:
 			exit(1);
 		}
 	}
@@ -159,7 +201,7 @@ int finddup_main(int argc, char *argv[]) {
 	));
 	fprintf(stderr, "build list...");
 	/* this is the build loop */
-	while (loc = ftell(namefd), fgets(curfile, MAXFN, namefd) != NULL) {
+	while (loc = ftell(namefd), getline(&curfile, &curfileLen, namefd) != -1) {
 		/* check for room in the buffer */
 		if (n_files == max_files) {
 			/* allocate more space */
@@ -175,11 +217,16 @@ int finddup_main(int argc, char *argv[]) {
 		curfile[strlen(curfile)-1] = EOS;
 
 		/* add the data for this one */
-		if (stat(curfile, &statbuf)) {
+		if (lstat(curfile, &statbuf)) {
 			fprintf(stderr, "%c  %s - ", 
 				(firsterr++ == 0 ? '\n' : '\r'), curfile
 			);
 			perror("ignored");
+			continue;
+		}
+
+		/* check if it's not a regular file */
+		if(!S_ISREG(statbuf.st_mode)){
 			continue;
 		}
 
@@ -205,6 +252,10 @@ int finddup_main(int argc, char *argv[]) {
 			(firsttrace++ == 0 ? '\n' : '\r'), n_files, curfile,
 			(long) statbuf.st_size, statbuf.st_ino
 		));
+	}
+
+	if(curfile != NULL){
+		free(curfile);
 	}
 
 	/* sort the list by size, device, and inode */
@@ -240,7 +291,10 @@ int finddup_main(int argc, char *argv[]) {
 }
 
 /* comp1 - compare two values */
-int comp1(const void *p1, const void *p2) {
+int
+comp1(p1, p2)
+char *p1, *p2;
+{
 	register filedesc *p1a = (filedesc *)p1, *p2a = (filedesc *)p2;
 	register int retval;
 	int temp;
@@ -253,7 +307,8 @@ int comp1(const void *p1, const void *p2) {
 
 /* scan1 - get a CRC32 for files of equal length */
 
-void scan1() {
+void
+scan1() {
 	FILE *fp;
 	int ix, needsort = 0;
 
@@ -277,7 +332,8 @@ void scan1() {
 
 /* scan2 - full compare if CRC is equal */
 
-void scan2() {
+void
+scan2() {
 	int ix, ix2, lastix;
 	int inmatch;				/* 1st filename has been printed */
 	int need_hdr = 1;			/* Need a hdr for the hard link list */
@@ -347,7 +403,9 @@ void scan2() {
 
 /* scan3 - output dups */
 
-void scan3() {
+void
+scan3()
+{
 	register filedesc *p1, *p2;
 	int ix, ix2, need_hdr = 1;
 	char *headfn = NULL;				/* pointer to the filename for sups */
@@ -374,6 +432,7 @@ void scan3() {
 				/* 1st filename if any dups */
 				if (headfn != NULL) {
 					printf("\nFILE: %s\n", headfn);
+					free(headfn);
 					headfn = NULL;
 				}
 				printf("DUP:  %s\n", getfn(ix));
@@ -384,16 +443,21 @@ void scan3() {
 
 /* get_crc - get a CRC32 for a file */
 
-unsigned long get_crc(int ix) {
+unsigned long
+get_crc(ix)
+int ix;
+{
 	FILE *fp;
 	register unsigned long val1 = 0x90909090, val2 = 0xeaeaeaea;
 	register int carry;
 	int ch; // int to get -1 when EOF, char doesn't take negative values
-	char fname[MAXFN];
+	char *fname = NULL;
+	size_t fnameLen = 0;
+	// uint32_t tempCRC = 0;
 
 	/* open the file */
 	fseek(namefd, filelist[ix].nameloc, 0);
-	fgets(fname, MAXFN, namefd);
+	getline(&fname, &fnameLen, namefd);
 	fname[strlen(fname)-1] = EOS;
 	debug(("\nCRC start - %s ", fname));
 	if ((fp = fopen(fname, "r")) == NULL) {
@@ -408,17 +472,28 @@ unsigned long get_crc(int ix) {
 		val2 += ch << (ch & 003);
 	}
 	debug(("v1: %08lx v2: %08lx ", val1, val2));
+	// tempCRC = rc_crc32(0, fname, strlen(fname));
+	// debug(("fname: %s, SUPER CRC: %08lx \n", fname, (unsigned long)tempCRC));
+	// debug(("Original crc: %lx \n", ((val1 & 0xffff) << 12) ^ (val2 && 0xffffff)));
 	fclose(fp);
+	if(fname != NULL){
+		free(fname);
+	}
 	return ((val1 & 0xffff) << 12) ^ (val2 && 0xffffff);
 }
 
+
 /* getfn - get filename from index */
 
-char * getfn(off_t ix)  {
-	static char fnbuf[MAXFN];
+char *
+getfn(ix)
+off_t ix;
+{
+	static char *fnbuf = NULL;
+	size_t fnbufLen = 0;
 
 	fseek(namefd, filelist[ix].nameloc, 0);
-	fgets(fnbuf, MAXFN, namefd);
+	getline(&fnbuf, &fnbufLen, namefd);
 	fnbuf[strlen(fnbuf)-1] = EOS;
 
 	return fnbuf;
@@ -426,13 +501,24 @@ char * getfn(off_t ix)  {
 
 /* fullcmp - compare two files, bit for bit */
 
-int fullcmp(int v1, int v2) {
-	FILE *fp1, *fp2;
-	char filename[MAXFN];
+int
+fullcmp(v1, v2)
+int v1, v2;
+{
+	FILE *fp1 = NULL, *fp2 = NULL;
+	char *filename = NULL;
+	char *tempfnbuf = NULL;
+	size_t filenameLen = 0;
 	register char ch;
 
+	getline(&filename, &filenameLen, namefd);
+
 	/* open the files */
-	strcpy(filename, getfn(v1));
+	tempfnbuf = getfn(v1);
+	strcpy(filename, tempfnbuf);
+	if(tempfnbuf != NULL){
+		free(tempfnbuf);
+	}
 	fp1 = fopen(filename, "r");
 	if (fp1 == NULL) {
 		fprintf(stderr, "%s: ", filename);
@@ -441,7 +527,11 @@ int fullcmp(int v1, int v2) {
 	}
 	debug(("\nFull compare %s\n         and", filename));
 
-	strcpy(filename, getfn(v2));
+	tempfnbuf = getfn(v2);
+	strcpy(filename, tempfnbuf);
+	if(tempfnbuf != NULL){
+		free(tempfnbuf);
+	}
 	fp2 = fopen(filename, "r");
 	if (fp2 == NULL) {
 		fprintf(stderr, "%s: ", filename);
@@ -456,6 +546,9 @@ int fullcmp(int v1, int v2) {
 	}
 
 	/* close files and return value */
+	if(filename != NULL){
+		free(filename);
+	}
 	fclose(fp1);
 	fclose(fp2);
 	debug(("\n      return %d", !(ch == EOF)));
