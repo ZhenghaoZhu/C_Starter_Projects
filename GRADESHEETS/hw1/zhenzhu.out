@@ -1,0 +1,192 @@
+[----] Criterion v2.3.3
+[====] Running 2 tests from audio_header_suite:
+[RUN ] audio_header_suite::read_header
+[PASS] audio_header_suite::read_header: (0.00s)
+[RUN ] audio_header_suite::write_header
+[PASS] audio_header_suite::write_header: (0.00s)
+[====] Running 3 tests from audio_suite:
+[RUN ] audio_suite::read_sample_EOF
+[PASS] audio_suite::read_sample_EOF: (0.00s)
+[RUN ] audio_suite::read_sample_normal
+[PASS] audio_suite::read_sample_normal: (0.00s)
+[RUN ] audio_suite::write_sample_normal
+[PASS] audio_suite::write_sample_normal: (0.00s)
+[====] Running 6 tests from basecode_tests_suite:
+[RUN ] basecode_tests_suite::goertzel_basic_test
+[PASS] basecode_tests_suite::goertzel_basic_test: (0.00s)
+[RUN ] basecode_tests_suite::help_system_test
+[PASS] basecode_tests_suite::help_system_test: (0.00s)
+[RUN ] basecode_tests_suite::validargs_detect_test
+[PASS] basecode_tests_suite::validargs_detect_test: (0.00s)
+[RUN ] basecode_tests_suite::validargs_error_test
+[PASS] basecode_tests_suite::validargs_error_test: (0.00s)
+[RUN ] basecode_tests_suite::validargs_generate_test
+[PASS] basecode_tests_suite::validargs_generate_test: (0.00s)
+[RUN ] basecode_tests_suite::validargs_help_test
+[PASS] basecode_tests_suite::validargs_help_test: (0.00s)
+[====] Running 1 test from black_box_detect_suite:
+[RUN ] black_box_detect_suite::basic
+[----] tests/blackbox_tests.c:120: Assertion failed: Unexpected DTMF detect result, there is a mismatch between the expected result
+[FAIL] black_box_detect_suite::basic: (0.01s)
+[====] Running 1 test from black_box_generate_suite:
+[RUN ] black_box_generate_suite::basic
+[PASS] black_box_generate_suite::basic: (0.01s)
+[====] Running 11 tests from detect_suite:
+[RUN ] detect_suite::basic
+[PASS] detect_suite::basic: (0.00s)
+[RUN ] detect_suite::connecting_events
+[----] tests/detect_tests.c:243: Assertion failed: Detected events differ from given ones.
+[----]   Output text is:
+[----]   0	1500	A
+[----]   1500	2000	B
+[----]   2000	2500	C
+[----]   2500	3000	D
+[----]   3000	3500	*
+[FAIL] detect_suite::connecting_events: (0.00s)
+Given: 
+1000	1500	A
+1500	2000	B
+2000	2500	C
+2500	3000	D
+3000	3500	*
+Detected: 
+0	1500	A
+1500	2000	B
+2000	2500	C
+2500	3000	D
+3000	3500	*
+[RUN ] detect_suite::finer_grained_events
+[----] tests/detect_tests.c:278: Assertion failed: Expected to detect 3 events, but actually 4
+[----]   Output text is:
+[----]   0	500	4
+[----]   500	900	5
+[----]   900	1200	C
+[----]   1600	1700	0
+[FAIL] detect_suite::finer_grained_events: (0.00s)
+[RUN ] detect_suite::full_output
+[PASS] detect_suite::full_output: (0.00s)
+[RUN ] detect_suite::high_noise
+[PASS] detect_suite::high_noise: (0.00s)
+[RUN ] detect_suite::larger_block
+[----] tests/detect_tests.c:414: Assertion failed: Detected events differ from given ones.
+[----]   Output text is:
+[----]   3000	3600	1
+[----]   4200	4800	3
+[----]   4800	5400	4
+[----]   5400	6000	#
+[----]   6000	6600	*
+[----]   6600	7800	D
+[----]   7800	9000	5
+[----]   9000	9600	7
+[----]   9600	11400	8
+[FAIL] detect_suite::larger_block: (0.00s)
+Given: 
+2400	3000	0
+3000	3600	1
+4200	4800	3
+4800	5400	4
+5400	6000	#
+6000	6600	*
+6600	7800	D
+7800	9000	5
+9000	9600	7
+9600	11400	8
+Detected: 
+3000	3600	1
+4200	4800	3
+4800	5400	4
+5400	6000	#
+6000	6600	*
+6600	7800	D
+7800	9000	5
+9000	9600	7
+9600	11400	8
+[RUN ] detect_suite::low_noise
+[PASS] detect_suite::low_noise: (0.00s)
+[RUN ] detect_suite::narrower_gap
+[PASS] detect_suite::narrower_gap: (0.00s)
+[RUN ] detect_suite::null_input
+[PASS] detect_suite::null_input: (0.00s)
+AUDIO HEADER CHECK NOT PASSED! 
+[RUN ] detect_suite::too_small_block
+[PASS] detect_suite::too_small_block: (0.00s)
+[RUN ] detect_suite::truncated_header
+[PASS] detect_suite::truncated_header: (0.00s)
+AUDIO HEADER CHECK NOT PASSED! 
+[====] Running 5 tests from exit_status_suite:
+[RUN ] exit_status_suite::dtmf_d
+[PASS] exit_status_suite::dtmf_d: (0.00s)
+[RUN ] exit_status_suite::dtmf_g
+[PASS] exit_status_suite::dtmf_g: (0.00s)
+[RUN ] exit_status_suite::dtmf_h
+[PASS] exit_status_suite::dtmf_h: (0.00s)
+[RUN ] exit_status_suite::dtmf_invalid_arg
+[PASS] exit_status_suite::dtmf_invalid_arg: (0.00s)
+[RUN ] exit_status_suite::no_args
+[PASS] exit_status_suite::no_args: (0.00s)
+[====] Running 10 tests from generate_suite:
+[RUN ] generate_suite::basic
+[PASS] generate_suite::basic: (0.00s)
+[RUN ] generate_suite::connecting_events
+[PASS] generate_suite::connecting_events: (0.00s)
+[RUN ] generate_suite::early_eof
+[FAIL] generate_suite::early_eof: Timed out. (10.00s)
+[RUN ] generate_suite::events_out_of_range
+[----] tests/generate_tests.c:182: Assertion failed: Expected failure on DTMF generation but returned success
+[FAIL] generate_suite::events_out_of_range: (0.00s)
+[RUN ] generate_suite::high_noise
+[----] tests/test_common.c:374: Assertion failed: Output audio sample is wrong, expected -0.714828, got 0.344584, audio data offset = 24, current event[0] = {600, 1200, 1}, sample in hex = 0x2c1b, sample index = 0
+[FAIL] generate_suite::high_noise: (0.00s)
+[RUN ] generate_suite::invalid_events
+[PASS] generate_suite::invalid_events: (0.00s)
+[RUN ] generate_suite::low_noise
+[----] tests/test_common.c:374: Assertion failed: Output audio sample is wrong, expected -0.065634, got 0.269723, audio data offset = 24, current event[0] = {100, 900, 5}, sample in hex = 0x2286, sample index = 0
+[FAIL] generate_suite::low_noise: (0.00s)
+[RUN ] generate_suite::narrower_gaps
+[PASS] generate_suite::narrower_gaps: (0.00s)
+[RUN ] generate_suite::overlapping_events
+[PASS] generate_suite::overlapping_events: (0.00s)
+[RUN ] generate_suite::short_noise
+[----] tests/test_common.c:374: Assertion failed: Output audio sample is wrong, expected -0.714828, got 0.344584, audio data offset = 24, current event[0] = {600, 900, C}, sample in hex = 0x2c1b, sample index = 0
+[FAIL] generate_suite::short_noise: (0.00s)
+[====] Running 5 tests from goertzel_suite:
+[RUN ] goertzel_suite::goertzel_init
+[PASS] goertzel_suite::goertzel_init: (0.00s)
+[RUN ] goertzel_suite::goertzel_step
+[PASS] goertzel_suite::goertzel_step: (0.00s)
+[RUN ] goertzel_suite::goertzel_strength
+[PASS] goertzel_suite::goertzel_strength: (0.00s)
+[RUN ] goertzel_suite::step_signal
+[PASS] goertzel_suite::step_signal: (0.00s)
+[RUN ] goertzel_suite::zero_signal
+[PASS] goertzel_suite::zero_signal: (0.00s)
+[====] Running 13 tests from validargs_suite:
+[RUN ] validargs_suite::dtmf
+[PASS] validargs_suite::dtmf: (0.00s)
+[RUN ] validargs_suite::dtmf_d
+[PASS] validargs_suite::dtmf_d: (0.00s)
+[RUN ] validargs_suite::dtmf_d_b_bsize
+[PASS] validargs_suite::dtmf_d_b_bsize: (0.00s)
+[RUN ] validargs_suite::dtmf_d_b_invalidBSize
+[PASS] validargs_suite::dtmf_d_b_invalidBSize: (0.00s)
+[RUN ] validargs_suite::dtmf_g
+[PASS] validargs_suite::dtmf_g: (0.00s)
+[RUN ] validargs_suite::dtmf_g_n_noiseFile_l_invalidLevel
+[PASS] validargs_suite::dtmf_g_n_noiseFile_l_invalidLevel: (0.00s)
+[RUN ] validargs_suite::dtmf_g_n_noiseFile_l_level
+[PASS] validargs_suite::dtmf_g_n_noiseFile_l_level: (0.00s)
+[RUN ] validargs_suite::dtmf_g_n_noise_file
+[PASS] validargs_suite::dtmf_g_n_noise_file: (0.00s)
+[RUN ] validargs_suite::dtmf_g_n_noise_file_l_level
+[PASS] validargs_suite::dtmf_g_n_noise_file_l_level: (0.00s)
+[RUN ] validargs_suite::dtmf_g_t_2000
+[----] tests/validargs_tests.c:70: Assertion failed: Correct audio_samples (2000) not set for -t. Got: 0
+[FAIL] validargs_suite::dtmf_g_t_2000: (0.00s)
+[RUN ] validargs_suite::dtmf_h
+[PASS] validargs_suite::dtmf_h: (0.00s)
+[RUN ] validargs_suite::dtmf_h_g_d
+[PASS] validargs_suite::dtmf_h_g_d: (0.00s)
+[RUN ] validargs_suite::dtmf_illegal_flags
+[PASS] validargs_suite::dtmf_illegal_flags: (0.00s)
+[----] Writing xml report in `crit.xml`.
+[====] Synthesis: Tested: 57 | Passing: 47 | Failing: 10 | Crashing: 0 

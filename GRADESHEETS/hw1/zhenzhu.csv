@@ -1,0 +1,82 @@
+Graded Commit:0410e46257fcd8edc7157ca4351bdd0ecc50a98c
+
+TEST NAME, POINTS,OUT OF
+audio_header_suite/read_header,1,1,
+audio_header_suite/write_header,1,1,
+audio_suite/read_sample_EOF,1,1,
+audio_suite/read_sample_normal,1,1,
+audio_suite/write_sample_normal,1,1,
+basecode_tests_suite/goertzel_basic_test,1,1,
+basecode_tests_suite/help_system_test,1,1,
+basecode_tests_suite/validargs_detect_test,1,1,
+basecode_tests_suite/validargs_error_test,1,1,
+basecode_tests_suite/validargs_generate_test,1,1,
+basecode_tests_suite/validargs_help_test,1,1,
+black_box_detect_suite/basic,0,1,"1 assertion(s) failed.: tests/blackbox_tests.c:120: Unexpected DTMF detect result, there is a mismatch between the expected result"
+black_box_generate_suite/basic,1,1,
+detect_suite/basic,1,1,
+detect_suite/connecting_events,0,1,"1 assertion(s) failed.: tests/detect_tests.c:243: Detected events differ from given ones.
+        Output text is:
+        0	1500	A
+        1500	2000	B
+        2000	2500	C
+        2500	3000	D
+        3000	3500	*"
+detect_suite/finer_grained_events,0,1,"1 assertion(s) failed.: tests/detect_tests.c:278: Expected to detect 3 events, but actually 4
+        Output text is:
+        0	500	4
+        500	900	5
+        900	1200	C
+        1600	1700	0"
+detect_suite/full_output,1,1,
+detect_suite/high_noise,1,1,
+detect_suite/larger_block,0,1,"1 assertion(s) failed.: tests/detect_tests.c:414: Detected events differ from given ones.
+        Output text is:
+        3000	3600	1
+        4200	4800	3
+        4800	5400	4
+        5400	6000	#
+        6000	6600	*
+        6600	7800	D
+        7800	9000	5
+        9000	9600	7
+        9600	11400	8"
+detect_suite/low_noise,1,1,
+detect_suite/narrower_gap,1,1,
+detect_suite/null_input,1,1,
+detect_suite/too_small_block,1,1,
+detect_suite/truncated_header,1,1,
+exit_status_suite/dtmf_d,1,1,
+exit_status_suite/dtmf_g,1,1,
+exit_status_suite/dtmf_h,1,1,
+exit_status_suite/dtmf_invalid_arg,1,1,
+exit_status_suite/no_args,1,1,
+generate_suite/basic,1,1,
+generate_suite/connecting_events,1,1,
+generate_suite/early_eof,0,1,The test timed out.: None
+generate_suite/events_out_of_range,0,1,1 assertion(s) failed.: tests/generate_tests.c:182: Expected failure on DTMF generation but returned success
+generate_suite/high_noise,0,1,"1 assertion(s) failed.: tests/test_common.c:374: Output audio sample is wrong, expected -0.714828, got 0.344584, audio data offset = 24, current event[0] = {600, 1200, 1}, sample in hex = 0x2c1b, sample index = 0"
+generate_suite/invalid_events,1,1,
+generate_suite/low_noise,0,1,"1 assertion(s) failed.: tests/test_common.c:374: Output audio sample is wrong, expected -0.065634, got 0.269723, audio data offset = 24, current event[0] = {100, 900, 5}, sample in hex = 0x2286, sample index = 0"
+generate_suite/narrower_gaps,1,1,
+generate_suite/overlapping_events,1,1,
+generate_suite/short_noise,0,1,"1 assertion(s) failed.: tests/test_common.c:374: Output audio sample is wrong, expected -0.714828, got 0.344584, audio data offset = 24, current event[0] = {600, 900, C}, sample in hex = 0x2c1b, sample index = 0"
+goertzel_suite/goertzel_init,1,1,
+goertzel_suite/goertzel_step,1,1,
+goertzel_suite/goertzel_strength,1,1,
+goertzel_suite/step_signal,1,1,
+goertzel_suite/zero_signal,1,1,
+validargs_suite/dtmf,1,1,
+validargs_suite/dtmf_d,1,1,
+validargs_suite/dtmf_d_b_bsize,1,1,
+validargs_suite/dtmf_d_b_invalidBSize,1,1,
+validargs_suite/dtmf_g,1,1,
+validargs_suite/dtmf_g_n_noiseFile_l_invalidLevel,1,1,
+validargs_suite/dtmf_g_n_noiseFile_l_level,1,1,
+validargs_suite/dtmf_g_n_noise_file,1,1,
+validargs_suite/dtmf_g_n_noise_file_l_level,1,1,
+validargs_suite/dtmf_g_t_2000,0,1,1 assertion(s) failed.: tests/validargs_tests.c:70: Correct audio_samples (2000) not set for -t. Got: 0
+validargs_suite/dtmf_h,1,1,
+validargs_suite/dtmf_h_g_d,1,1,
+validargs_suite/dtmf_illegal_flags,1,1,
+total,47,57
