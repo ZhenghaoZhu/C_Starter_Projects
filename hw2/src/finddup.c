@@ -98,9 +98,8 @@ char *getfn();					/* get a filename by index */
 int fullcmp(int v1, int v2);	/* compare two files, bit for bit */
 
 // Other file functions (getopt.c)
-extern int att_getopt(int argc, char **argv, char *opts);
 extern uint32_t rc_crc32(uint32_t crc, const char *buf, size_t len);
-
+// extern int att_getopt(int argc, char **argv, char *opts);
 
 int finddup_main(argc, argv)
 int argc;
@@ -127,49 +126,55 @@ char *argv[];
 	opterr = 0;
 	while ((ch = getopt_long(argc, argv, OPTSTR, long_options, &option_index)) != -1) {
 		switch (ch) {
-		case 0:
-			#ifdef DEBUG
-			if(!strcmp(long_options[option_index].name, "debug")){
-				if(optarg){
-					DebugFlg = atoi(optarg);
+
+			case 0:
+				#ifdef DEBUG
+				if(!strcmp(long_options[option_index].name, "debug")){
+					if(optarg){
+						DebugFlg = atoi(optarg);
+						break;
+					}
+					else {
+						DebugFlg++;
+						break;
+					}
+				}
+				#endif
+				if(!strcmp(long_options[option_index].name, "no-links")){
+					linkflag = 0;
 					break;
 				}
-				else {
-					DebugFlg++;
-					break;
+				if(!strcmp(long_options[option_index].name, "help")){
+					for (ch = 0; ch < HelpLen; ++ch) {
+						printf("%s\n", HelpMsg[ch]);
+					}
+					exit(0);
 				}
-			}
-			#endif
-			if(!strcmp(long_options[option_index].name, "no-links")){
+
+			case 'l': /* set link flag */
 				linkflag = 0;
 				break;
-			}
-			if(!strcmp(long_options[option_index].name, "help")){
+
+		#ifdef DEBUG
+			case 'd': /* debug */
+				++DebugFlg;
+				break;
+		#endif /* ?DEBUG */
+
+			case 'h': /* help */
 				for (ch = 0; ch < HelpLen; ++ch) {
 					printf("%s\n", HelpMsg[ch]);
 				}
 				exit(0);
-			}
-		case 'l': /* set link flag */
-			linkflag = 0;
-			break;
-	#ifdef DEBUG
-		case 'd': /* debug */
-			++DebugFlg;
-			break;
-	#endif /* ?DEBUG */
-		case 'h': /* help */
-			for (ch = 0; ch < HelpLen; ++ch) {
-				printf("%s\n", HelpMsg[ch]);
-			}
-			exit(0);
-		case '?':
-			for (ch = 0; ch < HelpLen; ++ch) {
-				printf("%s\n", HelpMsg[ch]);
-			}
-			exit(1);
-		default:
-			exit(1);
+
+			case '?':
+				for (ch = 0; ch < HelpLen; ++ch) {
+					printf("%s\n", HelpMsg[ch]);
+				}
+				exit(1);
+				
+			default:
+				exit(1);
 		}
 	}
 
@@ -254,9 +259,7 @@ char *argv[];
 		));
 	}
 
-	if(curfile != NULL){
-		free(curfile);
-	}
+	free(curfile);
 
 	/* sort the list by size, device, and inode */
 	fprintf(stderr, "sort...");
@@ -448,12 +451,11 @@ get_crc(ix)
 int ix;
 {
 	FILE *fp;
-	register unsigned long val1 = 0x90909090, val2 = 0xeaeaeaea;
-	register int carry;
-	int ch; // int to get -1 when EOF, char doesn't take negative values
+	uint32_t curCRC32 = 0;
 	char *fname = NULL;
+	char *curLine = NULL;
 	size_t fnameLen = 0;
-	// uint32_t tempCRC = 0;
+	size_t curLineLen = 0;
 
 	/* open the file */
 	fseek(namefd, filelist[ix].nameloc, 0);
@@ -465,21 +467,18 @@ int ix;
 		exit(1);
 	}
 
-	/* build the CRC values */
-	while ((ch = fgetc(fp)) != EOF) {
-		carry = (val1 & 0x8000000) != 0;
-		val1 = ((val1 << 1) ^ ch) + carry;
-		val2 += ch << (ch & 003);
+	/* build the CRC values, each line at a time */
+	while(getline(&curLine, &curLineLen, fp) != -1){
+		curCRC32 += rc_crc32(0, curLine, strlen(curLine));
 	}
-	debug(("v1: %08lx v2: %08lx ", val1, val2));
-	// tempCRC = rc_crc32(0, fname, strlen(fname));
-	// debug(("fname: %s, SUPER CRC: %08lx \n", fname, (unsigned long)tempCRC));
-	// debug(("Original crc: %lx \n", ((val1 & 0xffff) << 12) ^ (val2 && 0xffffff)));
+
+	/* Close and free stuff */
+	free(fname);
+	free(curLine);
 	fclose(fp);
-	if(fname != NULL){
-		free(fname);
-	}
-	return ((val1 & 0xffff) << 12) ^ (val2 && 0xffffff);
+
+
+	return curCRC32;
 }
 
 
@@ -516,9 +515,7 @@ int v1, v2;
 	/* open the files */
 	tempfnbuf = getfn(v1);
 	strcpy(filename, tempfnbuf);
-	if(tempfnbuf != NULL){
-		free(tempfnbuf);
-	}
+	free(tempfnbuf);
 	fp1 = fopen(filename, "r");
 	if (fp1 == NULL) {
 		fprintf(stderr, "%s: ", filename);
@@ -529,9 +526,7 @@ int v1, v2;
 
 	tempfnbuf = getfn(v2);
 	strcpy(filename, tempfnbuf);
-	if(tempfnbuf != NULL){
-		free(tempfnbuf);
-	}
+	free(tempfnbuf);
 	fp2 = fopen(filename, "r");
 	if (fp2 == NULL) {
 		fprintf(stderr, "%s: ", filename);
@@ -546,9 +541,7 @@ int v1, v2;
 	}
 
 	/* close files and return value */
-	if(filename != NULL){
-		free(filename);
-	}
+	free(filename);
 	fclose(fp1);
 	fclose(fp2);
 	debug(("\n      return %d", !(ch == EOF)));

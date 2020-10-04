@@ -43,7 +43,11 @@ int	optind = 1;
 int	optopt;
 char	*optarg;
 
-int att_getopt(int argc, char **argv, char *opts) {
+int
+att_getopt(argc, argv, opts)
+int	argc;
+char	**argv, *opts;
+{
 	static int sp = 1;
 	register int c;
 	register char *cp;
