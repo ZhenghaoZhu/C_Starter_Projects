@@ -1,0 +1,41 @@
+Graded Commit:6e367f43712515048434221c254cb1d9d8deaa71
+
+TEST NAME, POINTS,OUT OF
+base_suite/binary_test,1,1,
+base_suite/filename_limit_fullcmp_test,0,1,The test crashed.: None
+base_suite/filename_limit_getcrc_test,1,1,
+base_suite/filename_limit_getfn_test,1,1,
+base_suite/hard_links_test,1,1,
+base_suite/larger_test,1,1,
+base_suite/quick_test,1,1,
+base_suite/valgrind_leak_test,1,1,
+base_suite/valgrind_uninitialized_test,1,1,
+blackbox_suite/directory_test,1,1,
+blackbox_suite/filename_len_limit,1,1,
+blackbox_suite/getopt_d_test,1,1,
+blackbox_suite/getopt_h_test,1,1,
+blackbox_suite/getopt_l_test,1,1,
+blackbox_suite/socket_files_test,1,1,
+blackbox_suite/sym_links_test,1,1,
+unit_suite/comp1_test_equal,1,1,
+unit_suite/comp1_test_larger,1,1,
+unit_suite/comp1_test_smaller,1,1,
+unit_suite/fullcmp_test_binary1_binary2,0,1,"1 assertion(s) failed.: tests/hw2_tests.c:406: unexpected fullcmp result. 
+         1. binary1 
+         2. binary2 
+        expect: ret!=0 | got: 0"
+unit_suite/fullcmp_test_file1_file1dup,1,1,
+unit_suite/fullcmp_test_file1_file2,1,1,
+unit_suite/get_crc_test_callcount,1,1,
+unit_suite/get_crc_test_file1,1,1,
+unit_suite/get_crc_test_file2,1,1,
+unit_suite/get_crc_test_file3,0,1,"1 assertion(s) failed.: tests/hw2_tests.c:185: difference between crc32_output and get_crc(int) return. 
+        filname: tests/rsrc/test_tree/file3 
+        crc32_output: e8467c40 | get_crc_ret: 3b6c6c84"
+valgrind_suite/fill_free_test,1,1,
+valgrind_suite/fill_malloc_test,1,1,
+valgrind_suite/leak_test,0,1,1 assertion(s) failed.: tests/test_common.c:131: Valgrind reported errors -- see tests.out/leak_test.err
+valgrind_suite/leak_test_extra_large,0,1,1 assertion(s) failed.: tests/test_common.c:131: Valgrind reported errors -- see tests.out/leak_test_extra_large.err
+valgrind_suite/uninitialized_test,1,1,
+valgrind_suite/uninitialized_test_extra_large,0,1,1 assertion(s) failed.: tests/test_common.c:131: Valgrind reported errors -- see tests.out/uninitialized_test_extra_large.err
+total,26,32

@@ -1,0 +1,122 @@
+[----] Criterion v2.3.3
+[====] Running 9 tests from base_suite:
+[RUN ] base_suite::binary_test
+setup(rm -f tests.out/binary_test.out tests.out/binary_test.err; rm -fr tests.out/binary_test; mkdir -p tests.out/binary_test)
+run( bin/finddup tests/rsrc/binary_test_names > tests.out/binary_test.out 2> tests.out/binary_test.err)
+[PASS] base_suite::binary_test: (0.03s)
+[RUN ] base_suite::filename_limit_fullcmp_test
+munmap_chunk(): invalid pointer
+[----] tests/hw2_tests.c:479: Unexpected signal caught below this line!
+[FAIL] base_suite::filename_limit_fullcmp_test: CRASH!
+[RUN ] base_suite::filename_limit_getcrc_test
+[PASS] base_suite::filename_limit_getcrc_test: (0.00s)
+[RUN ] base_suite::filename_limit_getfn_test
+[PASS] base_suite::filename_limit_getfn_test: (0.00s)
+[RUN ] base_suite::hard_links_test
+setup(rm -f tests.out/hard_links_test.out tests.out/hard_links_test.err; rm -fr tests.out/hard_links_test; mkdir -p tests.out/hard_links_test)
+run( bin/finddup tests/rsrc/hard_links_test_names > tests.out/hard_links_test.out 2> tests.out/hard_links_test.err)
+[PASS] base_suite::hard_links_test: (0.06s)
+[RUN ] base_suite::larger_test
+setup(rm -f tests.out/larger_test.out tests.out/larger_test.err; rm -fr tests.out/larger_test; mkdir -p tests.out/larger_test)
+run( bin/finddup tests/rsrc/larger_test_names > tests.out/larger_test.out 2> tests.out/larger_test.err)
+[PASS] base_suite::larger_test: (0.04s)
+[RUN ] base_suite::quick_test
+setup(rm -f tests.out/quick_test.out tests.out/quick_test.err; rm -fr tests.out/quick_test; mkdir -p tests.out/quick_test)
+run( bin/finddup tests/rsrc/quick_test_names > tests.out/quick_test.out 2> tests.out/quick_test.err)
+[PASS] base_suite::quick_test: (0.03s)
+[RUN ] base_suite::valgrind_leak_test
+setup(rm -f tests.out/valgrind_leak_test.out tests.out/valgrind_leak_test.err; rm -fr tests.out/valgrind_leak_test; mkdir -p tests.out/valgrind_leak_test)
+run(valgrind --leak-check=full --undef-value-errors=no --error-exitcode=37 bin/finddup tests/rsrc/quick_test_names > tests.out/valgrind_leak_test.out 2> tests.out/valgrind_leak_test.err)
+[PASS] base_suite::valgrind_leak_test: (0.58s)
+[RUN ] base_suite::valgrind_uninitialized_test
+setup(rm -f tests.out/valgrind_uninitialized_test.out tests.out/valgrind_uninitialized_test.err; rm -fr tests.out/valgrind_uninitialized_test; mkdir -p tests.out/valgrind_uninitialized_test)
+run(valgrind --leak-check=no --undef-value-errors=yes --error-exitcode=37 bin/finddup tests/rsrc/quick_test_names > tests.out/valgrind_uninitialized_test.out 2> tests.out/valgrind_uninitialized_test.err)
+[PASS] base_suite::valgrind_uninitialized_test: (0.61s)
+[====] Running 7 tests from blackbox_suite:
+[RUN ] blackbox_suite::directory_test
+setup(rm -f tests.out/directory_test.out tests.out/directory_test.err; rm -fr tests.out/directory_test; mkdir -p tests.out/directory_test)
+run( bin/finddup tests/rsrc/directory_test_names > tests.out/directory_test.out 2> tests.out/directory_test.err)
+[PASS] blackbox_suite::directory_test: (0.03s)
+[RUN ] blackbox_suite::filename_len_limit
+setup(rm -f tests.out/filename_len_limit_test.out tests.out/filename_len_limit_test.err; rm -fr tests.out/filename_len_limit_test; mkdir -p tests.out/filename_len_limit_test)
+run( bin/finddup tests/rsrc/filename_len_limit_test_names > tests.out/filename_len_limit_test.out 2> tests.out/filename_len_limit_test.err)
+[PASS] blackbox_suite::filename_len_limit: (0.03s)
+[RUN ] blackbox_suite::getopt_d_test
+setup(rm -f tests.out/getopt_d_test.out tests.out/getopt_d_test.err; rm -fr tests.out/getopt_d_test; mkdir -p tests.out/getopt_d_test)
+run( bin/finddup -d tests/rsrc/getopt_test_names | grep -o 'First vector allocated' > tests.out/getopt_d_test.out 2> tests.out/getopt_d_test.err)
+build list...sort...scan1...scan2...done
+[PASS] blackbox_suite::getopt_d_test: (0.02s)
+[RUN ] blackbox_suite::getopt_h_test
+setup(rm -f tests.out/getopt_h_test.out tests.out/getopt_h_test.err; rm -fr tests.out/getopt_h_test; mkdir -p tests.out/getopt_h_test)
+run( bin/finddup -h tests/rsrc/getopt_test_names | head -n 6 > tests.out/getopt_h_test.out 2> tests.out/getopt_h_test.err)
+[PASS] blackbox_suite::getopt_h_test: (0.02s)
+[RUN ] blackbox_suite::getopt_l_test
+setup(rm -f tests.out/getopt_l_test.out tests.out/getopt_l_test.err; rm -fr tests.out/getopt_l_test; mkdir -p tests.out/getopt_l_test)
+run( bin/finddup -l tests/rsrc/getopt_test_names > tests.out/getopt_l_test.out 2> tests.out/getopt_l_test.err)
+[PASS] blackbox_suite::getopt_l_test: (0.03s)
+[RUN ] blackbox_suite::socket_files_test
+setup(rm -f tests.out/socket_files_test.out tests.out/socket_files_test.err; rm -fr tests.out/socket_files_test; mkdir -p tests.out/socket_files_test)
+run( bin/finddup tests/rsrc/socket_files_test_names > tests.out/socket_files_test.out 2> tests.out/socket_files_test.err)
+[PASS] blackbox_suite::socket_files_test: (0.03s)
+[RUN ] blackbox_suite::sym_links_test
+setup(rm -f tests.out/sym_links_test.out tests.out/sym_links_test.err; rm -fr tests.out/sym_links_test; mkdir -p tests.out/sym_links_test)
+run( bin/finddup tests/rsrc/sym_links_test_names > tests.out/sym_links_test.out 2> tests.out/sym_links_test.err)
+[PASS] blackbox_suite::sym_links_test: (0.04s)
+[====] Running 10 tests from unit_suite:
+[RUN ] unit_suite::comp1_test_equal
+[PASS] unit_suite::comp1_test_equal: (0.00s)
+[RUN ] unit_suite::comp1_test_larger
+[PASS] unit_suite::comp1_test_larger: (0.00s)
+[RUN ] unit_suite::comp1_test_smaller
+[PASS] unit_suite::comp1_test_smaller: (0.00s)
+[RUN ] unit_suite::fullcmp_test_binary1_binary2
+[----] tests/hw2_tests.c:406: Assertion failed: unexpected fullcmp result. 
+[----]    1. binary1 
+[----]    2. binary2 
+[----]   expect: ret!=0 | got: 0 
+[FAIL] unit_suite::fullcmp_test_binary1_binary2: (0.00s)
+[RUN ] unit_suite::fullcmp_test_file1_file1dup
+[PASS] unit_suite::fullcmp_test_file1_file1dup: (0.00s)
+[RUN ] unit_suite::fullcmp_test_file1_file2
+[PASS] unit_suite::fullcmp_test_file1_file2: (0.00s)
+[RUN ] unit_suite::get_crc_test_callcount
+[PASS] unit_suite::get_crc_test_callcount: (0.05s)
+[RUN ] unit_suite::get_crc_test_file1
+[PASS] unit_suite::get_crc_test_file1: (0.05s)
+[RUN ] unit_suite::get_crc_test_file2
+[PASS] unit_suite::get_crc_test_file2: (0.05s)
+[RUN ] unit_suite::get_crc_test_file3
+[----] tests/hw2_tests.c:185: Assertion failed: difference between crc32_output and get_crc(int) return. 
+[----]   filname: tests/rsrc/test_tree/file3 
+[----]   crc32_output: e8467c40 | get_crc_ret: 3b6c6c84
+[FAIL] unit_suite::get_crc_test_file3: (0.05s)
+[====] Running 6 tests from valgrind_suite:
+[RUN ] valgrind_suite::fill_free_test
+setup(rm -f tests.out/fill_free_test.out tests.out/fill_free_test.err; rm -fr tests.out/fill_free_test; mkdir -p tests.out/fill_free_test)
+run(valgrind --leak-check=no --free-fill=0xcd --undef-value-errors=no --error-exitcode=37 bin/finddup tests/rsrc/extra_large_list > tests.out/fill_free_test.out 2> tests.out/fill_free_test.err)
+[PASS] valgrind_suite::fill_free_test: (1.14s)
+[RUN ] valgrind_suite::fill_malloc_test
+setup(rm -f tests.out/fill_malloc_test.out tests.out/fill_malloc_test.err; rm -fr tests.out/fill_malloc_test; mkdir -p tests.out/fill_malloc_test)
+run(valgrind --leak-check=no --malloc-fill=0xcc --undef-value-errors=no --error-exitcode=37 bin/finddup tests/rsrc/extra_large_list > tests.out/fill_malloc_test.out 2> tests.out/fill_malloc_test.err)
+[PASS] valgrind_suite::fill_malloc_test: (0.81s)
+[RUN ] valgrind_suite::leak_test
+setup(rm -f tests.out/leak_test.out tests.out/leak_test.err; rm -fr tests.out/leak_test; mkdir -p tests.out/leak_test)
+run(valgrind --leak-check=full --undef-value-errors=no --error-exitcode=37 bin/finddup tests/rsrc/larger_test_names > tests.out/leak_test.out 2> tests.out/leak_test.err)
+[----] tests/test_common.c:131: Assertion failed: Valgrind reported errors -- see tests.out/leak_test.err
+[FAIL] valgrind_suite::leak_test: (0.62s)
+[RUN ] valgrind_suite::leak_test_extra_large
+setup(rm -f tests.out/leak_test_extra_large.out tests.out/leak_test_extra_large.err; rm -fr tests.out/leak_test_extra_large; mkdir -p tests.out/leak_test_extra_large)
+run(valgrind --leak-check=full --undef-value-errors=no --error-exitcode=37 bin/finddup tests/rsrc/extra_large_list > tests.out/leak_test_extra_large.out 2> tests.out/leak_test_extra_large.err)
+[----] tests/test_common.c:131: Assertion failed: Valgrind reported errors -- see tests.out/leak_test_extra_large.err
+[FAIL] valgrind_suite::leak_test_extra_large: (0.83s)
+[RUN ] valgrind_suite::uninitialized_test
+setup(rm -f tests.out/uninitialized_test.out tests.out/uninitialized_test.err; rm -fr tests.out/uninitialized_test; mkdir -p tests.out/uninitialized_test)
+run(valgrind --leak-check=no --undef-value-errors=yes --error-exitcode=37 bin/finddup tests/rsrc/larger_test_names > tests.out/uninitialized_test.out 2> tests.out/uninitialized_test.err)
+[PASS] valgrind_suite::uninitialized_test: (0.64s)
+[RUN ] valgrind_suite::uninitialized_test_extra_large
+setup(rm -f tests.out/uninitialized_test_extra_large.out tests.out/uninitialized_test_extra_large.err; rm -fr tests.out/uninitialized_test_extra_large; mkdir -p tests.out/uninitialized_test_extra_large)
+run(valgrind --leak-check=no --undef-value-errors=yes --error-exitcode=37 bin/finddup tests/rsrc/extra_large_list > tests.out/uninitialized_test_extra_large.out 2> tests.out/uninitialized_test_extra_large.err)
+[----] tests/test_common.c:131: Assertion failed: Valgrind reported errors -- see tests.out/uninitialized_test_extra_large.err
+[FAIL] valgrind_suite::uninitialized_test_extra_large: (0.87s)
+[----] Writing xml report in `crit.xml`.
+[====] Synthesis: Tested: 32 | Passing: 26 | Failing: 6 | Crashing: 1 
