@@ -4,6 +4,13 @@
 #include "debug.h"
 #include "sfmm.h"
 #define TEST_TIMEOUT 15
+/*
+ * Define WEAK_MAGIC during compilation to use MAGIC of 0x0 for debugging purposes.
+ * Note that this feature will be disabled during grading.
+ */
+#ifdef WEAK_MAGIC
+int sf_weak_magic = 1;
+#endif
 
 /*
  * Assert the total number of free blocks of a specified size.
