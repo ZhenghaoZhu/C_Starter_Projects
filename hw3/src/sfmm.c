@@ -100,6 +100,7 @@ void *sf_malloc(size_t size) {
                     newNext->body.links.prev = newPrev;
                     sf_put_in_free_list(splitBlock, curListBlockSz - blockSize);
                     curBlock->header = (blockSize | THIS_BLOCK_ALLOCATED | PREV_BLOCK_ALLOCATED) ^ MAGIC;
+                    // sf_show_heap();
                     return curBlock->body.payload;
                 }
                 else {
@@ -159,7 +160,8 @@ void sf_free(void *pp) {
 
     if((curBlock->header & PREV_BLOCK_ALLOCATED) == 0){
         sf_block *past_block = sf_get_past_block(curBlock, curBlockSz);
-        if((past_block->header & THIS_BLOCK_ALLOCATED) != 0){
+        unsigned long newCurBlockInt = (unsigned long) past_block;
+        if((newCurBlockInt >= (unsigned long)sf_mem_start()) && ((past_block->header & THIS_BLOCK_ALLOCATED) != 0)){
             abort();
         }
     }
@@ -203,6 +205,7 @@ void *sf_realloc(void *pp, size_t rsize) {
         abort();
     }
     curBlockSz = curBlock->header;
+    
     curBlockSz ^= MAGIC;
     if((curBlockSz & THIS_BLOCK_ALLOCATED) == 0x4){
         curBlockSz -= 4;
@@ -223,7 +226,7 @@ void *sf_realloc(void *pp, size_t rsize) {
     if((curBlock->header & PREV_BLOCK_ALLOCATED) == 0){
         sf_block *past_block = sf_get_past_block(curBlock, curBlockSz);
         curBlockInt = (long int)past_block;
-        if((curBlockInt < (unsigned long)sf_mem_start()) && ((past_block->header & THIS_BLOCK_ALLOCATED) != 0)){
+        if((curBlockInt >= (unsigned long)sf_mem_start()) && ((past_block->header & THIS_BLOCK_ALLOCATED) != 0)){
             sf_errno = EINVAL;
             abort();
         }
@@ -244,7 +247,9 @@ void *sf_realloc(void *pp, size_t rsize) {
             return NULL;
         }
         memcpy(newBiggerBlock, curBlock, curBlockSz - 8);
+        debug("TO FREE \n");
         sf_free((sf_block*)((char*)curBlock + 16));
+        debug("OUT OF  FREE \n");
         return newBiggerBlock; 
     }
     
@@ -315,6 +320,8 @@ void sf_init_first_page(){
     sf_free_list_heads[7].body.links.next = pgBlock;
     pgBlock->body.links.prev = &sf_free_list_heads[7];
     pgBlock->body.links.next = &sf_free_list_heads[7];
+
+    // sf_show_heap();
     return;
 }
 
@@ -370,7 +377,7 @@ void sf_set_block_footer(sf_block *curBlock){
     return;
 }
 
-void sf_coalesce(){
+void sf_coalesce(void* middleBlock, size_t blockSz){
     return;
 }
 
