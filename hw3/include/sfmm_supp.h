@@ -15,3 +15,4 @@ void sf_put_in_quick_list_helper(sf_block *curBlock, int curIdx);
 size_t sf_take_out_last_three_bits_and_get_block_size(sf_block *curBlock);
 void* sf_get_past_block(void * middleBlockHeader, size_t blockSz);
 void* sf_get_next_block(void * middleBlockHeader, size_t blockSz);
+void sf_remove_from_free_list(sf_block *removedBlock);
