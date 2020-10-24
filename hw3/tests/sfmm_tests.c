@@ -195,7 +195,6 @@ Test(sfmm_basecode_suite, freelist, .timeout = TEST_TIMEOUT) {
 	assert_free_list_size(3, 3);
 	assert_free_list_size(6, 1);
 
-	sf_show_heap();
 	// First block in list should be the most recently freed block.
 	int i = 3;
 	sf_block *bp = sf_free_list_heads[i].body.links.next;

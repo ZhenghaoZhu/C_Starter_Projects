@@ -12,4 +12,6 @@ void sf_set_block_footer(sf_block *curBlock);
 void sf_coalesce();
 int sf_put_in_quick_list(sf_block *curBlock, size_t blockSize);
 void sf_put_in_quick_list_helper(sf_block *curBlock, int curIdx);
-void sf_take_out_last_three_bits(sf_block *curBlock);
+size_t sf_take_out_last_three_bits_and_get_block_size(sf_block *curBlock);
+void* sf_get_past_block(void * middleBlockHeader, size_t blockSz);
+void* sf_get_next_block(void * middleBlockHeader, size_t blockSz);
