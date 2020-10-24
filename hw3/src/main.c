@@ -13,11 +13,13 @@ int sf_weak_magic = 1;
 
 int main(int argc, char const *argv[]) {
 
-    /* void *x = */ sf_malloc(8);
-	void *y = sf_malloc(32);
-	/* void *z = */ sf_malloc(1);
+    void *x = sf_malloc(sizeof(int));
+	/* void *y = */ sf_malloc(10);
+	debug("1 \n");
+    sf_show_heap();
+	x = sf_realloc(x, sizeof(int) * 20);
+	debug("2 \n");
 
-	sf_free(y);
     sf_show_heap();
     
 

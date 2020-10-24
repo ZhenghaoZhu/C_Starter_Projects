@@ -124,7 +124,9 @@ void *sf_malloc(size_t size) {
 
 // NOTE: Page 885 for example code
 void sf_free(void *pp) {
+    
     sf_block *curBlock = (sf_block*)(pp - sizeof(char) * 16);
+    debug("free curBlock ptr : %p \n", curBlock);
     // setFooter += sizeof(char) * (curBlock->header ^ MAGIC);
     bool hadPrevAll = false;
     size_t curBlockSz;
@@ -220,7 +222,8 @@ void *sf_realloc(void *pp, size_t rsize) {
     
     if((curBlock->header & PREV_BLOCK_ALLOCATED) == 0){
         sf_block *past_block = sf_get_past_block(curBlock, curBlockSz);
-        if((past_block->header & THIS_BLOCK_ALLOCATED) != 0){
+        curBlockInt = (long int)past_block;
+        if((curBlockInt < (unsigned long)sf_mem_start()) && ((past_block->header & THIS_BLOCK_ALLOCATED) != 0)){
             sf_errno = EINVAL;
             abort();
         }
@@ -236,7 +239,13 @@ void *sf_realloc(void *pp, size_t rsize) {
     } 
 
     if(curBlockSz < rsize){ // TODO: Give bigger block than original
-        return NULL; 
+        sf_block * newBiggerBlock = sf_malloc(rsize);
+        if(newBiggerBlock == NULL){
+            return NULL;
+        }
+        memcpy(newBiggerBlock, curBlock, curBlockSz - 8);
+        sf_free((sf_block*)((char*)curBlock + 16));
+        return newBiggerBlock; 
     }
     
     if(curBlockSz > rsize){ // TODO: Give smaller block than original
@@ -247,10 +256,23 @@ void *sf_realloc(void *pp, size_t rsize) {
         if((curBlockSz - (rsize + (size_t)8)) < 32){ // Splinter don't split
             return pp;
         }
-        else {
-            debug("curBlockSz : %zu \n", curBlockSz);
-            debug("rsize + header : %zu \n", (rsize + 8));
-            return NULL;
+        else { // TODO: Coalesce for this
+            sf_block *splitBlock = NULL;
+            size_t newBlockSz = rsize + 8;
+            while(newBlockSz % 16 != 0 || newBlockSz <= 16){
+                newBlockSz += 1;
+            }
+            splitBlock = (sf_block*)((char*)curBlock + newBlockSz);
+            splitBlock->header = ((curBlockSz - newBlockSz) | PREV_BLOCK_ALLOCATED) ^ MAGIC;
+            splitBlock->prev_footer = (newBlockSz | THIS_BLOCK_ALLOCATED) ^ MAGIC;
+            sf_set_block_footer(splitBlock);
+            sf_block *newPrev = curBlock->body.links.prev;
+            sf_block *newNext = curBlock->body.links.next;
+            newPrev->body.links.next = newNext;
+            newNext->body.links.prev = newPrev;
+            sf_put_in_free_list(splitBlock, curBlockSz - newBlockSz);
+            curBlock->header = (newBlockSz | THIS_BLOCK_ALLOCATED | PREV_BLOCK_ALLOCATED) ^ MAGIC;
+            return curBlock->body.payload;
         }
     }
 

@@ -206,7 +206,9 @@ Test(sfmm_basecode_suite, freelist, .timeout = TEST_TIMEOUT) {
 Test(sfmm_basecode_suite, realloc_larger_block, .timeout = TEST_TIMEOUT) {
 	void *x = sf_malloc(sizeof(int));
 	/* void *y = */ sf_malloc(10);
+	debug("1 \n");
 	x = sf_realloc(x, sizeof(int) * 20);
+	debug("2 \n");
 
 	cr_assert_not_null(x, "x is NULL!");
 	sf_block *bp = (sf_block *)((char *)x - 2*sizeof(sf_header));
@@ -250,6 +252,7 @@ Test(sfmm_basecode_suite, realloc_smaller_block_free_block, .timeout = TEST_TIME
 	// This block will go into the main freelist and be coalesced.  Note that we don't put split
         // blocks into the quick lists because their sizes are not sizes that were requested by the
 	// client, so they are not very likely to satisfy a new request.
+	sf_show_heap();
 	assert_quick_list_block_count(0, 0);	
 	assert_free_block_count(0, 1);
 	assert_free_block_count(4048, 1);
