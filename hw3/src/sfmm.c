@@ -90,9 +90,9 @@ void *sf_malloc(size_t size) {
             }
             if(curListBlockSz >= blockSize){
                 if((curListBlockSz - blockSize) >= 32){
+                    // debug("curBlock before offset: %p \n", curBlock);
                     splitBlock = (sf_block*)((char*)curBlock + blockSize);
-                    splitBlock->header = ((curListBlockSz - blockSize)) ^ MAGIC;
-                    sf_set_block_footer(splitBlock);
+                    // debug("curBlock after offset: %p \n", splitBlock);
                     splitBlock->header = ((curListBlockSz - blockSize)) ^ MAGIC;
                     sf_block *newPrev = curBlock->body.links.prev;
                     sf_block *newNext = curBlock->body.links.next;
@@ -100,12 +100,12 @@ void *sf_malloc(size_t size) {
                     newNext->body.links.prev = newPrev;
                     sf_put_in_free_list(splitBlock, curListBlockSz - blockSize);
                     curBlock->header = (blockSize | THIS_BLOCK_ALLOCATED) ^ MAGIC;
-                    debug("Returned: %li \n", ((curBlock->header) ^ MAGIC) - 4);
-                    return curBlock;
+                    // debug("Returned: %li \n", ((curBlock->header) ^ MAGIC) - 4);
+                    return curBlock->body.payload;
                 }
                 else {
                     // Creates a splinter, just return it. (First-fit policy)
-                    return curBlock;
+                    return curBlock->body.payload;
                 }
             }
         }
@@ -118,7 +118,8 @@ void *sf_malloc(size_t size) {
 
 // NOTE: Page 885 for example code
 void sf_free(void *pp) {
-    sf_block *curBlock = (sf_block *) pp;
+    sf_block *curBlock = (sf_block*)(pp - sizeof(char) * 16);
+    // setFooter += sizeof(char) * (curBlock->header ^ MAGIC);
     size_t curBlockSz;
     long int curBlockInt;
 
@@ -150,6 +151,8 @@ void sf_free(void *pp) {
         return;
     }
 
+    // sf_set_block_footer(curBlock);
+    // debug("curBlock Size : %li the other va: %li \n", curBlock->header, curBlockSz);
     sf_put_in_free_list(curBlock, curBlockSz);
 
     return;
@@ -192,9 +195,9 @@ void sf_init_first_page(){
     setFooter += sizeof(char) * 4080;
     *((long int *) setFooter) = (long int) pgBlockSz;
 
-    sf_free_list_heads[6].body.links.next = pgBlock;
-    pgBlock->body.links.prev = &sf_free_list_heads[6];
-    pgBlock->body.links.next = &sf_free_list_heads[6];
+    sf_free_list_heads[7].body.links.next = pgBlock;
+    pgBlock->body.links.prev = &sf_free_list_heads[7];
+    pgBlock->body.links.next = &sf_free_list_heads[7];
     // sf_show_free_lists();
     // printf("\n");
     // sf_show_quick_lists();
@@ -242,7 +245,9 @@ void sf_put_in_free_list(sf_block *splitBlock, size_t blockSize){
 
 void sf_put_in_free_list_helper(sf_block *splitBlock, int curIdx){
     sf_take_out_last_three_bits(splitBlock);
+    sf_set_block_footer(splitBlock);
     sf_block *oldNext = sf_free_list_heads[curIdx].body.links.next;
+    oldNext->body.links.prev = splitBlock;
     splitBlock->body.links.next = oldNext;
     splitBlock->body.links.prev = &sf_free_list_heads[curIdx];
     sf_free_list_heads[curIdx].body.links.next = splitBlock;
@@ -250,6 +255,7 @@ void sf_put_in_free_list_helper(sf_block *splitBlock, int curIdx){
 }
 
 void sf_set_block_footer(sf_block *curBlock){
+    // debug("Offesting footer by : %li \n ++++++++++++++++++ \n", offset);
     void* setFooter = curBlock;
     setFooter += sizeof(char) * (curBlock->header ^ MAGIC);
     *((long int *) setFooter) = (long int) curBlock->header;
@@ -338,7 +344,6 @@ void sf_take_out_last_three_bits(sf_block *curBlock){
     }
 
     curBlock->header = curBlockSz ^ MAGIC;
-    debug("HAHAHHAH: %li \n", curBlock->header);
     return;
 }
 

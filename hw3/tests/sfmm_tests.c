@@ -184,9 +184,9 @@ Test(sfmm_basecode_suite, freelist, .timeout = TEST_TIMEOUT) {
 	void *y = sf_malloc(200);
 	/* void *z = */ sf_malloc(700);
 
-	sf_free(u);
-	sf_free(w);
 	sf_free(y);
+	sf_free(w);
+	sf_free(u);
 
 	assert_quick_list_block_count(0, 0);
 	assert_free_block_count(0, 4);
@@ -195,12 +195,13 @@ Test(sfmm_basecode_suite, freelist, .timeout = TEST_TIMEOUT) {
 	assert_free_list_size(3, 3);
 	assert_free_list_size(6, 1);
 
+	sf_show_heap();
 	// First block in list should be the most recently freed block.
 	int i = 3;
 	sf_block *bp = sf_free_list_heads[i].body.links.next;
-	cr_assert_eq(bp, (char *)y - 2*sizeof(sf_header),
+	cr_assert_eq(bp, (char *)u - 2*sizeof(sf_header),
 		     "Wrong first block in free list %d: (found=%p, exp=%p)",
-                     i, bp, (char *)y - 2*sizeof(sf_header));
+                     i, bp, (char *)u - 2*sizeof(sf_header));
 }
 
 Test(sfmm_basecode_suite, realloc_larger_block, .timeout = TEST_TIMEOUT) {
