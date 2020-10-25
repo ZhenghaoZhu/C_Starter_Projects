@@ -152,6 +152,10 @@ Test(sfmm_basecode_suite, free_no_coalesce, .timeout = TEST_TIMEOUT) {
 
 	sf_free(y);
 
+	debug("++++++ 1 \n");
+	sf_show_heap();
+	debug("++++++ 1 \n");
+
 	assert_quick_list_block_count(0, 0);
 	assert_free_block_count(0, 2);
 	assert_free_block_count(208, 1);
@@ -168,6 +172,7 @@ Test(sfmm_basecode_suite, free_coalesce, .timeout = TEST_TIMEOUT) {
 
 	sf_free(y);
 	sf_free(x);
+
 
 	assert_quick_list_block_count(0, 0);
 	assert_free_block_count(0, 2);
@@ -187,6 +192,10 @@ Test(sfmm_basecode_suite, freelist, .timeout = TEST_TIMEOUT) {
 	sf_free(y);
 	sf_free(w);
 	sf_free(u);
+
+	debug("++++++ 2 \n");
+	sf_show_heap();
+	debug("++++++ 2 \n");
 
 	assert_quick_list_block_count(0, 0);
 	assert_free_block_count(0, 4);

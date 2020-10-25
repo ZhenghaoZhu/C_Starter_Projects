@@ -177,6 +177,7 @@ void sf_free(void *pp) {
     next_block->header = (((next_block->header ^ MAGIC) & ~PREV_BLOCK_ALLOCATED) ^ MAGIC);
     sf_set_block_footer(next_block);
 
+
     if(hadPrevAll){
         curBlock->header = (curBlockSz | PREV_BLOCK_ALLOCATED) ^ MAGIC;
     }
@@ -186,7 +187,9 @@ void sf_free(void *pp) {
     
     sf_set_block_footer(curBlock);
 
-    sf_put_in_free_list(curBlock, curBlockSz);
+    // sf_put_in_free_list(curBlock, curBlockSz);
+    sf_coalesce(curBlock, curBlockSz);
+
 
     return;
 }
@@ -394,7 +397,7 @@ void sf_coalesce(void* middleBlock, size_t blockSz){
         past_block = NULL;
     }
     else {
-        past_block_sz = sf_take_out_last_three_bits_and_get_block_size(past_block);
+        past_block_sz = (past_block->header ^ MAGIC) & ~0x7;
         if(!((past_block->header ^ MAGIC) & THIS_BLOCK_ALLOCATED)){
             past_block_all = true;
         }
@@ -404,13 +407,14 @@ void sf_coalesce(void* middleBlock, size_t blockSz){
         next_block = NULL;
     }
     else {
-        next_block_sz = sf_take_out_last_three_bits_and_get_block_size(next_block);
+        next_block_sz = (next_block->header ^ MAGIC) & ~0x7;
         if(!((next_block->header ^ MAGIC) & THIS_BLOCK_ALLOCATED)){
             next_block_all = true;
         }
     }
 
-    if(past_block_all && next_block_all){
+    if(!past_block_all && !next_block_all){
+        sf_put_in_free_list(middleBlock, blockSz);
         return;
     }
     else if(past_block_all && !next_block_all){
