@@ -13,15 +13,8 @@ int sf_weak_magic = 1;
 
 int main(int argc, char const *argv[]) {
 
-    /* void *w = */ sf_malloc(8);
-	void *x = sf_malloc(200);
-	void *y = sf_malloc(300);
-	/* void *z = */ sf_malloc(4);
-
-    sf_show_heap();
-	sf_free(y);
-    sf_show_heap();
-	sf_free(x);
+    void *x = sf_malloc(16384 - 16 - (sizeof(sf_header) + sizeof(sf_footer)));
+    x += 0;
     sf_show_heap();
 
     
