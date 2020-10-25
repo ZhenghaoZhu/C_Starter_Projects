@@ -112,6 +112,7 @@ Test(sfmm_basecode_suite, malloc_four_pages, .timeout = TEST_TIMEOUT) {
 	// We want to allocate up to exactly four pages.
 	void *x = sf_malloc(16384 - 16 - (sizeof(sf_header) + sizeof(sf_footer)));
 
+	sf_show_heap();
 	cr_assert_not_null(x, "x is NULL!");
 	assert_quick_list_block_count(0, 0);
 	assert_free_block_count(0, 0);
