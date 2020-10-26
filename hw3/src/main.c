@@ -13,11 +13,27 @@ int sf_weak_magic = 1;
 
 int main(int argc, char const *argv[]) {
 
-    void *x = sf_malloc(16384 - 16 - (sizeof(sf_header) + sizeof(sf_footer)));
-    x += 0;
-    sf_show_heap();
 
-    
+	void *a = sf_malloc(20);
+    void *b = sf_malloc(50);
+    void *c = sf_malloc(115);
+    void *d = sf_malloc(130);
+
+    sf_free(a);
+    sf_free(b);
+    sf_free(c);
+    sf_free(d);
+
+    sf_malloc(1);
+    sf_malloc(55);
+    sf_malloc(120);
+    sf_malloc(135);
+
+	sf_show_heap();
+
+
+	// assert_quick_list_block_count(0, 1); // Should only have one 32 byte block in quicklist, rest are flushed
+	// assert_free_block_count(160, 1); // The coalesced block 
 
     return EXIT_SUCCESS;
 }
