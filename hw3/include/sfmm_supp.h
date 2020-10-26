@@ -4,7 +4,7 @@
 
 
 void sf_init_lists();
-void sf_flush_quick_list(int listIdx);
+void sf_flush_quick_list(sf_block* curBlock, int listIdx);
 void sf_init_first_page();
 void sf_put_in_free_list(sf_block *splitBlock, size_t blockSize);
 void sf_put_in_free_list_helper(sf_block *splitBlock, int curIdx);
@@ -17,3 +17,4 @@ void* sf_get_past_block(void * middleBlockHeader, size_t blockSz);
 void* sf_get_next_block(void * middleBlockHeader, size_t blockSz);
 void sf_remove_from_free_list(sf_block *removedBlock);
 size_t sf_get_block_sz(sf_block *curBlock);
+void sf_flush_free_helper(sf_block* curBlock);

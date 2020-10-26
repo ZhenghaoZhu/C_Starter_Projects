@@ -55,7 +55,6 @@ void *sf_malloc(size_t size) {
         paddingSz += 1;
     }
 
-    // Initialize quicklists with nothing in them
     size_t curListBlockSz = 0;
     for(i = 0; i < NUM_QUICK_LISTS; i++){
         if(sf_quick_lists[i].length > 0){
@@ -69,8 +68,11 @@ void *sf_malloc(size_t size) {
                 curListBlockSz -= 2;
             }
 
-            if(curListBlockSz >= blockSize){
-                return NULL;  // TODO:
+            if(curListBlockSz == blockSize){
+                sf_quick_lists[i].length -= 1;
+                sf_block *retBlock = sf_quick_lists[i].first;
+                sf_quick_lists[i].first = retBlock->body.links.next;
+                return retBlock->body.payload;
             }
         }
     }
@@ -108,7 +110,15 @@ void *sf_malloc(size_t size) {
                 }
                 else {
                     sf_remove_from_free_list(curBlock);
-                    curBlock->header = ((curBlock->header ^ MAGIC) | THIS_BLOCK_ALLOCATED) ^ MAGIC;
+                    if(((globalEnd->header ^ MAGIC) & THIS_BLOCK_ALLOCATED) == THIS_BLOCK_ALLOCATED){
+                        curBlock->header = ((curBlock->header ^ MAGIC) | THIS_BLOCK_ALLOCATED | PREV_BLOCK_ALLOCATED) ^ MAGIC;
+                    }
+                    else {
+                        curBlock->header = ((curBlock->header ^ MAGIC) | THIS_BLOCK_ALLOCATED) ^ MAGIC;
+                    }
+                    if((unsigned long)curBlock > (unsigned long)globalEnd){
+                        globalEnd = curBlock;
+                    }
                     return curBlock->body.payload;
                 }
             }
@@ -130,7 +140,14 @@ void *sf_malloc(size_t size) {
         newPage->header = (PAGE_SZ) ^ MAGIC;
         newPage->prev_footer = globalEndBlockSz ^ MAGIC;
     }
-    size_t tempSize = size - globalEndBlockSz;
+
+    size_t tempSize = 0;
+    if(((globalEnd->header ^ MAGIC) & THIS_BLOCK_ALLOCATED) == THIS_BLOCK_ALLOCATED){
+        tempSize = size;
+    }
+    else {
+        tempSize = size - globalEndBlockSz;
+    }
     while(((int)tempSize) >= 0){
         if(sf_mem_grow() == NULL){
             sf_errno = ENOMEM;
@@ -152,6 +169,7 @@ void *sf_malloc(size_t size) {
 void sf_free(void *pp) {
     
     sf_block *curBlock = (sf_block*)(pp - sizeof(char) * 16);
+    // sf_show_block(curBlock);
     // setFooter += sizeof(char) * (curBlock->header ^ MAGIC);
     bool hadPrevAll = false;
     size_t curBlockSz;
@@ -182,10 +200,10 @@ void sf_free(void *pp) {
         abort();
     }
 
-    if((curBlock->header & PREV_BLOCK_ALLOCATED) == 0){
+    if(((curBlock->header ^ MAGIC) & PREV_BLOCK_ALLOCATED) == 0){
         sf_block *past_block = sf_get_past_block(curBlock, curBlockSz);
         unsigned long newCurBlockInt = (unsigned long) past_block;
-        if((newCurBlockInt >= (unsigned long)sf_mem_start()) && ((past_block->header & THIS_BLOCK_ALLOCATED) != 0)){
+        if((newCurBlockInt >= (unsigned long)sf_mem_start()) && (newCurBlockInt < (unsigned long)sf_mem_end()) && (((past_block->header ^ MAGIC) & THIS_BLOCK_ALLOCATED) != 0)){
             abort();
         }
     }
@@ -247,10 +265,10 @@ void *sf_realloc(void *pp, size_t rsize) {
         abort();
     }
     
-    if((curBlock->header & PREV_BLOCK_ALLOCATED) == 0){
+    if(((curBlock->header ^ MAGIC) & PREV_BLOCK_ALLOCATED) == 0){
         sf_block *past_block = sf_get_past_block(curBlock, curBlockSz);
         curBlockInt = (long int)past_block;
-        if((curBlockInt >= (unsigned long)sf_mem_start()) && ((past_block->header & THIS_BLOCK_ALLOCATED) != 0)){
+        if((curBlockInt >= (unsigned long)sf_mem_start()) && (((past_block->header ^ MAGIC) & THIS_BLOCK_ALLOCATED) != 0)){
             sf_errno = EINVAL;
             abort();
         }
@@ -261,6 +279,10 @@ void *sf_realloc(void *pp, size_t rsize) {
         return NULL;
     }
 
+    size_t difference = rsize + 8;
+    while(difference % 16 != 0){
+        difference += 1;
+    }
     if(curBlockSz == (rsize + 8)){ // rsize same as current payload plus header
         return pp;
     } 
@@ -276,11 +298,7 @@ void *sf_realloc(void *pp, size_t rsize) {
     }
     
     if(curBlockSz > rsize){ // TODO: Give smaller block than original
-        size_t difference = rsize + 8;
-        while(difference % 16 != 0){
-            difference += 1;
-        }
-        if((curBlockSz - (rsize + (size_t)8)) < 32){ // Splinter don't split
+        if(curBlockSz - difference < 32){ // Splinter don't split
             return pp;
         }
         else { // TODO: Coalesce for this
@@ -329,7 +347,33 @@ void sf_init_lists(){
     return;
 }
 
-void sf_flush_quick_list(int listIdx){
+void sf_flush_quick_list(sf_block* curBlock, int listIdx){
+    sf_block *blockArray[QUICK_LIST_MAX];
+    int count = 0;
+    if (sf_quick_lists[listIdx].length != 0){
+        sf_block *head = sf_quick_lists[listIdx].first;
+        while(head != NULL){
+            head->header = ((head->header ^ MAGIC) & ~0x7) ^ MAGIC;
+            sf_set_block_footer(head);
+            blockArray[count] = head;
+            count += 1;
+            head = head->body.links.next;
+        }
+        curBlock->body.links.next = NULL;
+        sf_quick_lists[listIdx].length = 1;
+        sf_quick_lists[listIdx].first = curBlock;
+        for(int i = 0; i < count; i++){
+            sf_coalesce(blockArray[i], sf_get_block_sz(blockArray[i]), blockArray[i]->prev_footer, false);
+        }
+        return;
+    }
+    return;
+}
+
+void sf_flush_free_helper(sf_block* curBlock){
+    curBlock->header = sf_get_block_sz(curBlock) ^ MAGIC;
+    sf_set_block_footer(curBlock);
+    sf_put_in_free_list(curBlock, sf_get_block_sz(curBlock));
     return;
 }
 
@@ -339,6 +383,7 @@ void sf_init_first_page(){
     sf_header pgBlockSz = 4080;
     pgBlockSz ^= MAGIC;
     pgBlock->header = pgBlockSz;
+    pgBlock->prev_footer = 0;
     void* setFooter = pgBlock;
     setFooter += sizeof(char) * 4080;
     *((long int *) setFooter) = (long int) pgBlockSz;
@@ -351,7 +396,7 @@ void sf_init_first_page(){
 }
 
 void sf_put_in_free_list(sf_block *splitBlock, size_t blockSize){
-    
+
     if(blockSize <= 32){
         sf_put_in_free_list_helper(splitBlock, 0);
     }
@@ -407,7 +452,10 @@ void sf_coalesce(void* middleBlock, size_t blockSz, size_t prevFooter, bool maki
     size_t newSize = 0;
     size_t past_block_sz = 0;
     size_t next_block_sz = 0;
-    sf_block * past_block = sf_get_past_block(middleBlock, prevFooter);
+    sf_block * past_block = NULL;
+    if(prevFooter > 0){
+        past_block = sf_get_past_block(middleBlock, prevFooter);
+    }
     sf_block * next_block = sf_get_next_block(middleBlock, blockSz);
     bool past_block_all = true;
     bool next_block_all = true;
@@ -418,7 +466,6 @@ void sf_coalesce(void* middleBlock, size_t blockSz, size_t prevFooter, bool maki
     }
     else {
         past_block_sz = (past_block->header ^ MAGIC) & ~0x7;
-        
         if(!((past_block->header ^ MAGIC) & THIS_BLOCK_ALLOCATED)){
             past_block_all = true;
         } else {
@@ -432,7 +479,6 @@ void sf_coalesce(void* middleBlock, size_t blockSz, size_t prevFooter, bool maki
     }
     else {
         next_block_sz = (next_block->header ^ MAGIC) & ~0x7;
-        
         if(!((next_block->header ^ MAGIC) & THIS_BLOCK_ALLOCATED)){
             next_block_all = true;
         } else {
@@ -532,12 +578,21 @@ int sf_put_in_quick_list(sf_block *curBlock, size_t blockSize){
 
 void sf_put_in_quick_list_helper(sf_block *curBlock, int curIdx){
     if(sf_quick_lists[curIdx].length == 5){
-        sf_flush_quick_list(curIdx); // Should reset length here
+        sf_flush_quick_list(curBlock, curIdx); // Should reset length here
+        return;
     }
     if(sf_quick_lists[curIdx].first != NULL){
         sf_quick_lists[curIdx].length += 1; // Add to quicklist
-        sf_block *oldFirst = sf_quick_lists[curIdx].first;
+        if(sf_quick_lists[curIdx].first == NULL){
+            curBlock->body.links.next = NULL;
+        }
+        else {
+            sf_block *oldFirst = sf_quick_lists[curIdx].first;
+            curBlock->body.links.next = oldFirst;   
         curBlock->body.links.next = oldFirst;
+            curBlock->body.links.next = oldFirst;   
+        }
+
         // curBlock->body.links.prev = NULL;
         // oldFirst->body.links.prev = curBlock;
         sf_quick_lists[curIdx].first = curBlock;
@@ -597,4 +652,3 @@ void sf_remove_from_free_list(sf_block *removedBlock){
 size_t sf_get_block_sz(sf_block *curBlock){
     return ((curBlock->header ^ MAGIC) & ~0x7);
 }
-
