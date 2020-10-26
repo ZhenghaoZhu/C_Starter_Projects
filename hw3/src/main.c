@@ -14,22 +14,36 @@ int sf_weak_magic = 1;
 int main(int argc, char const *argv[]) {
 
 
-	void *a = sf_malloc(20);
-    void *b = sf_malloc(50);
-    void *c = sf_malloc(115);
-    void *d = sf_malloc(130);
+	void *a = sf_malloc(10);
+    void *b = sf_malloc(10);
+    void *c = sf_malloc(10);
+    void *d = sf_malloc(20);
+    void *e = sf_malloc(20);
+    void *f = sf_malloc(20);
+	void *g = sf_malloc(10);
+    void *h = sf_malloc(10);
+    void *i = sf_malloc(10);
+    void *j = sf_malloc(20);
+    void *k = sf_malloc(20);
+    sf_malloc(20);
 
     sf_free(a);
     sf_free(b);
     sf_free(c);
     sf_free(d);
-
-    sf_malloc(1);
-    sf_malloc(55);
-    sf_malloc(120);
-    sf_malloc(135);
-
+    sf_free(e);
+	sf_free(f);
+	sf_free(g);
+    sf_free(h);
+    sf_free(i);
+    sf_free(j);
+    debug("+++5 \n");
 	sf_show_heap();
+	debug("+++5 \n");
+    sf_free(k);
+    debug("+++6 \n");
+	sf_show_heap();
+	debug("+++6 \n");
 
 
 	// assert_quick_list_block_count(0, 1); // Should only have one 32 byte block in quicklist, rest are flushed

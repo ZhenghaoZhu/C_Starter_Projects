@@ -263,12 +263,12 @@ Test(sfmm_basecode_suite, realloc_smaller_block_free_block, .timeout = TEST_TIME
 
 Test(sfmm_student_suite, quicklist_flush_test, .timeout = TEST_TIMEOUT) {
 
-	void *a = sf_malloc(10);
-    void *b = sf_malloc(10);
-    void *c = sf_malloc(10);
-    void *d = sf_malloc(20);
-    void *e = sf_malloc(20);
-    void *f = sf_malloc(20);
+	void *a = sf_malloc(1);
+    void *b = sf_malloc(1);
+    void *c = sf_malloc(1);
+    void *d = sf_malloc(2);
+    void *e = sf_malloc(2);
+    void *f = sf_malloc(2);
 
     sf_free(a);
     sf_free(b);
@@ -278,7 +278,9 @@ Test(sfmm_student_suite, quicklist_flush_test, .timeout = TEST_TIMEOUT) {
     sf_free(f);
 
 	assert_quick_list_block_count(0, 1); // Should only have one 32 byte block in quicklist, rest are flushed
+	assert_quick_list_size(0, 1);
 	assert_free_block_count(160, 1); // The coalesced block 
+	assert_free_list_size(7,1);
 }
 
 Test(sfmm_student_suite, use_quick_list, .timeout = TEST_TIMEOUT){
@@ -297,13 +299,15 @@ Test(sfmm_student_suite, use_quick_list, .timeout = TEST_TIMEOUT){
     sf_malloc(120);
     sf_malloc(135);
 
-	sf_show_heap();
+	assert_quick_list_block_count(0, 0);
+	for(int i = 0; i < NUM_QUICK_LISTS; i++){
+		assert_quick_list_size(i, 0);
+	}
     assert_free_block_count(3712, 1);
-    assert_quick_list_block_count(0, 0);
     assert_free_list_size(7,1);
 }
 
-Test(sfmm_student_suite, quick_list_error, .timeout = TEST_TIMEOUT){
+Test(sfmm_student_suite, another_quick_list_test, .timeout = TEST_TIMEOUT){
     void *x = sf_malloc(60);
     void *y = sf_malloc(70);
     void *z = sf_malloc(70);
@@ -313,36 +317,44 @@ Test(sfmm_student_suite, quick_list_error, .timeout = TEST_TIMEOUT){
     sf_free(y);
 
     assert_quick_list_block_count(80, 3);
+	for(int i = 0; i < NUM_QUICK_LISTS; i++){
+		if(i == 3){
+			assert_quick_list_size(i, 3);
+		}
+		else {
+			assert_quick_list_size(i, 0);
+		}
+	}
     assert_free_block_count(0, 1);
     assert_free_block_count(3840, 1);
 }
 
-Test(sfmm_student_suite, malloc_testing, .timeout = TEST_TIMEOUT){
-    void *x = sf_malloc(100);
-    void *y = sf_malloc(150);
-    void *z = sf_malloc(200);
+Test(sfmm_student_suite, malloc_a_alot, .timeout = TEST_TIMEOUT){
+    void *a = sf_malloc(4000);
+    void *b = sf_malloc(4000);
+    void *c = sf_malloc(4000);
+    sf_malloc(4050);
+    sf_free(a);
+    sf_free(c);
+    sf_free(b);
+
+    assert_free_block_count(12048, 1);
+	assert_free_list_size(9,1);
+    assert_quick_list_block_count(0, 0);
+    assert_quick_list_size(5,0);
+}
+
+Test(sfmm_student_suite, malloc_and_malloc_too_much, .timeout = TEST_TIMEOUT){
+    void *x = sf_malloc(110);
+    void *y = sf_malloc(1050);
+    void *z = sf_malloc(2000);
     sf_free(y);
     sf_malloc(PAGE_SZ << 16);
     sf_free(x);
     sf_free(z);
 
-    assert_quick_list_block_count(0,2);
+    assert_quick_list_block_count(0,1);
+	assert_quick_list_size(6, 1);
     assert_free_list_size(9,1);
-    assert_free_block_count(65248, 1);
-}
-
-Test(sfmm_student_suite, page_create_test, .timeout = TEST_TIMEOUT){
-    void *a = sf_malloc(4064);
-    void *b = sf_malloc(4060);
-    void *c = sf_malloc(4062);
-    sf_malloc(4064);
-    sf_malloc(4066);
-    sf_free(a);
-    sf_free(c);
-    sf_free(b);
-
-    assert_free_block_count(12272, 1);
-    assert_quick_list_block_count(0, 0);
-    assert_free_list_size(9,1);
-    assert_quick_list_size(5,0);
+    assert_free_block_count(65392, 1);
 }
