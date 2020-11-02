@@ -1,0 +1,45 @@
+Graded Commit:f645ba07628ae136bf137471bfb1b35665bd229a
+
+TEST NAME, POINTS,OUT OF
+sf_memsuite_grading/free_block_too_small,1,1,
+sf_memsuite_grading/free_null,0,1,0 assertion(s) failed.: None
+sf_memsuite_grading/free_prev_alloc,1,1,
+sf_memsuite_grading/free_unallocated,0,1,1 assertion(s) failed.: tests/grading_tests_p2.c:182: SIGABRT should have been received
+sf_memsuite_grading/initialization,1,1,
+sf_memsuite_grading/malloc_free_coalesce_both,1,1,
+sf_memsuite_grading/malloc_free_coalesce_lower,1,1,
+sf_memsuite_grading/malloc_free_coalesce_upper,1,1,
+sf_memsuite_grading/malloc_free_first_block,1,1,
+sf_memsuite_grading/malloc_free_last_block,0,1,The test crashed.: None
+sf_memsuite_grading/malloc_free_lifo,1,1,
+sf_memsuite_grading/malloc_free_no_coalesce,1,1,
+sf_memsuite_grading/malloc_to_exhaustion,1,1,
+sf_memsuite_grading/malloc_with_splinter,1,1,
+sf_memsuite_grading/realloc_larger,1,1,
+sf_memsuite_grading/realloc_same,1,1,
+sf_memsuite_grading/realloc_size_0,1,1,
+sf_memsuite_grading/realloc_smaller,1,1,
+sf_memsuite_grading/realloc_splinter,1,1,
+sf_memsuite_grading/single_malloc_1,1,1,
+sf_memsuite_grading/single_malloc_12000,1,1,
+sf_memsuite_grading/single_malloc_16,1,1,
+sf_memsuite_grading/single_malloc_32,1,1,
+sf_memsuite_grading/single_malloc_4072,1,1,
+sf_memsuite_grading/single_malloc_4080,1,1,
+sf_memsuite_grading/single_malloc_max,1,1,
+sf_memsuite_grading/stress_test,0,1,The test timed out.: None
+sfmm_basecode_suite/free_coalesce,1,1,
+sfmm_basecode_suite/free_no_coalesce,1,1,
+sfmm_basecode_suite/free_quick,1,1,
+sfmm_basecode_suite/freelist,1,1,
+sfmm_basecode_suite/malloc_an_int,1,1,
+sfmm_basecode_suite/malloc_four_pages,1,1,
+sfmm_basecode_suite/malloc_too_large,1,1,
+sfmm_basecode_suite/realloc_larger_block,1,1,
+sfmm_basecode_suite/realloc_smaller_block_free_block,1,1,
+sfmm_basecode_suite/realloc_smaller_block_splinter,1,1,
+total,33,37extra_test1,0.6,0.6
+extra_test2,0.6,0.6
+extra_test3,0.6,0.6
+extra_test4,0.6,0.6
+extra_test5,0.6,0.6
