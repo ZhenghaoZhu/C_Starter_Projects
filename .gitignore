@@ -3,3 +3,5 @@ build/
 logs/
 *~
 *.out
+hw1/.vscode
+hw1/test_files/
