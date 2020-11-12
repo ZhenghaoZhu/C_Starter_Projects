@@ -156,15 +156,16 @@ void legion_check_args(FILE *out){
             else {
                 struct daemonNode *curNode = legion_status(argArr[1]);
                 fprintf(out, "%s\t%i\t%s\n", curNode->daemonName, curNode->daemonProcessID, daemon_status_map[curNode->daemonStatus]);
+                fflush(out);
             }
         }
         else if(strcmp(argArr[0], "status-all") == 0){
             if((argArrIdx - 1) > 0){
                 legion_check_args_print_err(out, argArrIdx, 0, "status-all");
             }
-            // else {
-            //     // print arr struct out
-            // }
+            else {
+                legion_status_all(out);
+            }
         }
         else if(strcmp(argArr[0], "start") == 0){
             if((argArrIdx - 1) > 1){
@@ -259,12 +260,8 @@ void legion_register(char *curName, char *curExe, int argCnt){
         daemonNodeHead->nextDaemon = tempNode;
     }
     else{
-        struct daemonNode *runnerNode = NULL;
-        runnerNode = daemonNodeHead;
-        while(runnerNode->nextDaemon != NULL){
-            runnerNode = runnerNode->nextDaemon;
-        }
-        runnerNode->nextDaemon = tempNode;
+        tempNode->nextDaemon = daemonNodeHead->nextDaemon;
+        daemonNodeHead->nextDaemon = tempNode;
     }
     
     // TODO  Fix cmd parameter
@@ -297,7 +294,14 @@ struct daemonNode* legion_status(char* curName){
     return NULL;
 }
 
-void legion_status_all(){
+void legion_status_all(FILE *out){
+    struct daemonNode *runnerNode = NULL;
+    runnerNode = daemonNodeHead;
+    while(runnerNode->nextDaemon != NULL){
+        runnerNode = runnerNode->nextDaemon;
+        fprintf(out, "%s\t%i\t%s\n", runnerNode->daemonName, runnerNode->daemonProcessID, daemon_status_map[runnerNode->daemonStatus]);
+        fflush(out);
+    }
     return;
 }
 

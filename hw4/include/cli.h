@@ -53,7 +53,7 @@ void legion_help();
 void legion_register(char *curName, char *curExe, int argCnt);
 void legion_unregister(char* curName);
 struct daemonNode* legion_status(char* curName);
-void legion_status_all();
+void legion_status_all(FILE *out);
 void legion_start(char* curName);
 void legion_stop(char* curName);
 void legion_logrotate(char* curDaemon);
@@ -114,13 +114,9 @@ void sigint_handler(int sig);
 
  TODO  unregister - search and if found, free struct, else return error
 
- TODO  status - show status of daemon struct
-
- TODO  status-all - show status of all daemon structs
-
  TODO  start - start daemon using struct, change struct
 
- TODO  stop - stop daemon using struct, change struct
+ TODO  stop - check if it exists, stop daemon using struct, change struct
 
  TODO  logrotate - change file directory of process 
  */
