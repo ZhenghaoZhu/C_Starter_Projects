@@ -35,7 +35,7 @@ struct daemonNode {
 };
 
 
-const char *daemon_status_map[7] = {"status_unknown", "status_inactive", "status_starting", "status_active", "status_stopping", "status_exited", "status_crashed"};
+const char *daemon_status_map[7] = {"unknown", "inactive", "starting", "active", "stopping", "exited", "crashed"};
 
 
 /*  SECTION  Parsing args functions */

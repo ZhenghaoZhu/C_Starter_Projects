@@ -155,6 +155,7 @@ void legion_check_args(FILE *out){
             }
             else {
                 struct daemonNode *curNode = legion_status(argArr[1]);
+                fprintf(out, "%s\t%i\t%s\n", curNode->daemonName, curNode->daemonProcessID, daemon_status_map[curNode->daemonStatus]);
             }
         }
         else if(strcmp(argArr[0], "status-all") == 0){
