@@ -62,6 +62,7 @@ int legion_parse_args(char curStr[], FILE *out){
     char *beginOfArgs = NULL;
     argArrIdx = 0;
     int curIdx = 0;
+    bool moreThanFourArgs = false;
     argsArrayLen = 0;
 
     while((int)wholeStr[curIdx] != 10){
@@ -111,9 +112,21 @@ int legion_parse_args(char curStr[], FILE *out){
         }
     }
     curArg = beginOfArgs;
-    
+    char argContainer[100];
     while ((token = strtok_r(curArg, "@", &curArg))){
-        argArr[argArrIdx++] = token;
+        if(!moreThanFourArgs && argArrIdx == 3){
+            strcpy(argContainer, token);
+            moreThanFourArgs = true;
+        }
+        else if(moreThanFourArgs){
+            strcat(argContainer, " ");
+            strcat(argContainer, token);
+            argArr[argArrIdx] = argContainer;
+        }
+        else {
+            argArr[argArrIdx++] = token;
+        }
+
     } 
 
     curArg = beginOfArgs;
@@ -263,9 +276,12 @@ void legion_register(char *curName, char *curExe, int argCnt){
         tempNode->nextDaemon = daemonNodeHead->nextDaemon;
         daemonNodeHead->nextDaemon = tempNode;
     }
-    
-    // TODO  Fix cmd parameter
-    sf_register(tempNode->daemonName, curName);
+    if(argArrIdx - 2 > 0){
+        sf_register(tempNode->daemonName, argArr[3]);
+    }
+    else{
+        sf_register(tempNode->daemonName, "");
+    }
 
     return;
 }
