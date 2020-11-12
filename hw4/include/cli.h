@@ -4,9 +4,10 @@
 
 
 #define DAEMON_NAME_MAX_LENGTH 100
-#define CUR_ARG_MAX_LENGTH 100
-#define CLI_ARGs_MAX_LENGTH 10000
-#define ARGS_ARRAY_LENGTH 1000
+#define DAEMON_ARGS_MAX_LENGTH 100
+#define DAEMON_EXE_MAX_LENGTH 100
+#define CLI_ARGs_MAX_LENGTH 1000
+#define CUR_ARG_MAX_LENGTH 1000
 
 #define HELP_MSG(out) do { \
 fprintf(out, "Available commands:\n" \
@@ -23,16 +24,13 @@ fprintf(out, "Available commands:\n" \
 return; \
 } while(0)
 
-struct argNode {
-    char curArg[CUR_ARG_MAX_LENGTH];
-    struct argNode *nextArg;
-};
-
 struct daemonNode {
     char daemonName[DAEMON_NAME_MAX_LENGTH];
+    char daemonExe[DAEMON_EXE_MAX_LENGTH];
+    char *daemonArgs[DAEMON_ARGS_MAX_LENGTH];
+    int numberOfArgs;
     int daemonStatus;
     int daemonProcessID;
-    struct argNode *argHead;
     struct daemonNode *nextDaemon;
 };
 
@@ -40,22 +38,30 @@ struct daemonNode {
 const char *daemon_status_map[7] = {"status_unknown", "status_inactive", "status_starting", "status_active", "status_stopping", "status_exited", "status_crashed"};
 
 
-void legion_parse_args(char curStr[], FILE *out, struct daemonNode *daemonNodeHead);
-int legion_char_idx(char curStr[]);
+/*  SECTION  Parsing args functions */
+int legion_parse_args(char curStr[], FILE *out);
+void legion_check_args(FILE *out);
+int legion_daemon_name_exists(char *curName);
+void legion_check_args_print_err(FILE *out, int givenArgCnt, int requiredArgCnt, char *curArg);
+
+
+/*  SECTION  Arg option functions */
 void legion_init();
-void legion_quit(struct daemonNode* daemonNodeHead);
+void legion_quit();
 void legion_free_daemon_node_head(struct daemonNode *daemonNodeHead);
 void legion_help();
-void legion_register(char* curDaemon);
-void legion_unregister(char* daemonName, char* daemonExec);
-void legion_status(char* curDaemon);
+void legion_register(char *curName, char *curExe, int argCnt);
+void legion_unregister(char* curName);
+struct daemonNode* legion_status(char* curName);
 void legion_status_all();
-void legion_start(char* daemonName);
-void legion_stop(char* daemonName);
+void legion_start(char* curName);
+void legion_stop(char* curName);
 void legion_logrotate(char* curDaemon);
 
-/* Helper functions to take out before submitting */
-void print_word_chars(char* curWord);
+/*  SECTION  Signal Handlers */
+void sigint_handler(int sig);
+
+/*  SECTION Helper functions to take out before submitting */
 
 // NOTE  Always use fflush(out) after priting out stuff to cli
 
@@ -104,13 +110,9 @@ void print_word_chars(char* curWord);
 // to an error.  A string describing the error may be passed, or NULL.
 
 /*
- TODO  help - print out help message
-
  TODO  quit - free structs, quit program
 
- TODO  register - read from arg, create struct
-
- TODO  unregister - free struct
+ TODO  unregister - search and if found, free struct, else return error
 
  TODO  status - show status of daemon struct
 
