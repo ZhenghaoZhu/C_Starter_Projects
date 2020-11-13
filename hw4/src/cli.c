@@ -16,6 +16,8 @@
 #include <signal.h>
 
 bool running = true;
+bool sigchld_flag = false;
+bool sigalrm_flag = false;
 char *argArr[CUR_ARG_MAX_LENGTH];
 int argArrIdx = 0;
 int argsArrayLen = 0;
@@ -25,6 +27,8 @@ void run_cli(FILE *in, FILE *out)
 {
     // TODO  Establish all signal handlers before doing anything
     signal(SIGINT, sigint_handler);
+    signal(SIGCHLD, sigchld_handler);
+    signal(SIGALRM, sigalrm_handler);
 
     daemonNodeHead = (struct daemonNode*) malloc(sizeof(struct daemonNode));
     strncpy(daemonNodeHead->daemonName, "daemonNodeHead", DAEMON_NAME_MAX_LENGTH);
@@ -46,8 +50,17 @@ void run_cli(FILE *in, FILE *out)
         // legion_quit(daemonNodeHead);
     }
 
-    // TODO  Free daemon structs
-    return;
+    // TODO  Free daemon structs  TODO 
+    
+    struct daemonNode *tempNode = NULL;
+    while(daemonNodeHead != NULL){
+        tempNode = daemonNodeHead;
+        daemonNodeHead = daemonNodeHead->nextDaemon;
+        free(tempNode);
+    }
+
+    // TODO  Put sf_fini()
+    
 }
 
 /*  SECTION  Parsing args functions */
@@ -116,6 +129,7 @@ int legion_parse_args(char curStr[], FILE *out){
     while ((token = strtok_r(curArg, "@", &curArg))){
         if(!moreThanFourArgs && argArrIdx == 3){
             strcpy(argContainer, token);
+            argArr[argArrIdx] = argContainer;
             moreThanFourArgs = true;
         }
         else if(moreThanFourArgs){
@@ -152,7 +166,7 @@ void legion_check_args(FILE *out){
                 fprintf(out, "Error executing command: %s \n", argArr[0]);
                 fflush(out);
             }
-            else if(!legion_daemon_name_exists(argArr[1])){
+            else if(legion_daemon_name_exists(argArr[1]) == NULL){
                 legion_register(argArr[1], argArr[2], argArrIdx - 3);
             }
             else{
@@ -160,6 +174,19 @@ void legion_check_args(FILE *out){
                 sf_error("command execution");
                 fprintf(out, "Error executing command: %s \n", argArr[0]);
                 fflush(out);
+            }
+        }
+        else if(strcmp(argArr[0], "unregister") == 0){
+            if((argArrIdx - 1) > 1){
+                legion_check_args_print_err(out, argArrIdx, 2, "unregister");
+            }
+            else {
+                if(!legion_unregister(argArr[1])){
+                    fprintf(out, "Daemon %s is not registered.\n", argArr[1]);
+                    sf_error("command execution");
+                    fprintf(out, "Error executing command: %s \n", argArr[0]);
+                    fflush(out);
+                }
             }
         }
         else if(strcmp(argArr[0], "status") == 0){
@@ -214,16 +241,16 @@ void legion_check_args(FILE *out){
     return;
 }
 
-int legion_daemon_name_exists(char *curName){
+struct daemonNode* legion_daemon_name_exists(char *curName){
     struct daemonNode *runnerNode = NULL;
     runnerNode = daemonNodeHead;
     while(runnerNode->nextDaemon != NULL){
         runnerNode = runnerNode->nextDaemon;
         if(strcmp(runnerNode->daemonName, curName) == 0){
-            return 1;
+            return runnerNode;
         }
     }
-    return 0;
+    return NULL;
 }
 
 void legion_check_args_print_err(FILE *out, int givenArgCnt, int requiredArgCnt, char *curArg){
@@ -241,9 +268,6 @@ void legion_init(){
 /*  SECTION  Arg option functions */
 
 void legion_quit(){
-    // TODO  Remove all daemons from processes
-    // legion_free_daemon_node_head(daemonNodeHead); // Free daemon node list
-    // sf_fini();
     running = false;
 }
 
@@ -276,7 +300,8 @@ void legion_register(char *curName, char *curExe, int argCnt){
         tempNode->nextDaemon = daemonNodeHead->nextDaemon;
         daemonNodeHead->nextDaemon = tempNode;
     }
-    if(argArrIdx - 2 > 0){
+
+    if((argArrIdx - 3) > 0){
         sf_register(tempNode->daemonName, argArr[3]);
     }
     else{
@@ -286,16 +311,29 @@ void legion_register(char *curName, char *curExe, int argCnt){
     return;
 }
 
-void legion_unregister(char* curName){
+int legion_unregister(char* curName){
+    if(daemonNodeHead->nextDaemon == NULL){
+        return 0;
+    }
+    struct daemonNode *foundNode = NULL;
     struct daemonNode *runnerNode = NULL;
     runnerNode = daemonNodeHead;
     while(runnerNode->nextDaemon != NULL){
         if(strcmp(runnerNode->nextDaemon->daemonName, curName) == 0){
-            runnerNode->nextDaemon = runnerNode->nextDaemon->nextDaemon;
+            if(runnerNode->nextDaemon->daemonStatus == status_inactive){
+                foundNode = runnerNode->nextDaemon;
+                sf_unregister(foundNode->daemonName);
+                runnerNode->nextDaemon = foundNode->nextDaemon;
+                free(runnerNode->nextDaemon);
+                return 1;
+            }
+            else {
+                return 0;
+            }
         }
         runnerNode = runnerNode->nextDaemon;
     }
-    return;
+    return 0;
 }
 
 struct daemonNode* legion_status(char* curName){
@@ -321,12 +359,68 @@ void legion_status_all(FILE *out){
     return;
 }
 
-void legion_start(char* daemonName){
+void legion_start(char* curName){
     return;
 }
 
-void legion_stop(char* daemonName){
-    return;
+int legion_stop(char* curName){
+    struct daemonNode *curNode = legion_daemon_name_exists(curName);
+    char errMsg[100];
+
+    if(curNode == NULL){
+        sprintf(errMsg, "Daemon %s is not registered.\n", curName);
+        sf_error(errMsg);
+        return STOP_ERROR;
+    }
+
+    if(curNode->daemonStatus == status_exited || curNode->daemonStatus == status_crashed){
+        curNode->daemonStatus = status_inactive;
+        sf_reset(curNode->daemonName);
+        return STOP_SUCCESS;
+    }
+
+    if(curNode->daemonStatus != status_active){
+        sprintf(errMsg, "Daemon %s is not active.\n", curName);
+        sf_error(errMsg);
+        return STOP_ERROR;
+    }
+
+    curNode->daemonStatus = status_stopping;
+    sf_stop(curNode->daemonName, curNode->daemonProcessID);
+    if(kill(curNode->daemonProcessID, SIGTERM) != 0){
+        sprintf(errMsg, "Unable to send SIGTERM to daemon %s.\n", curName);
+        sf_error(errMsg);
+        return STOP_ERROR;
+    }
+
+    sigset_t curMask;
+    sigemptyset(&curMask);
+    alarm(CHILD_TIMEOUT);
+    sigsuspend(&curMask);
+
+    if(sigchld_flag){
+        alarm(0); // Get rid of past alarm
+        pid_t curPID = waitpid(curNode->daemonProcessID, NULL, 0);
+        if(curPID == -1){
+            sprintf(errMsg, "WaitPID error with daemon %s.\n", curName);
+            sf_error(errMsg);
+            sf_crash(curNode->daemonName, curPID, SIGTERM);
+            return STOP_ERROR;
+        }
+        sigchld_flag = false;
+        sf_term(curNode->daemonName, curPID, 0);
+        return STOP_SUCCESS;
+    }
+
+    if(sigalrm_flag){
+        kill(curNode->daemonProcessID, SIGKILL);
+        sprintf(errMsg, "Daemon %s killed with SIGKILL.\n", curName);
+        sf_error(errMsg);
+        return STOP_ERROR;
+    }
+
+    return STOP_ERROR;
+
 }
 
 void legion_logrotate(char* curDaemon){
@@ -348,6 +442,15 @@ void print_word_chars(char* curWord){
 
 void sigint_handler(int sig) /* Safe SIGINT handler */
 {
-    printf("So you think you can stop the bomb with ctrlc, do you?\n");
-    _exit(0);
-} 
+    running = false;
+}
+
+void sigchld_handler(int sig) /* Safe SIGINT handler */
+{
+    sigchld_flag = true;
+}
+
+void sigalrm_handler(int sig) /* Safe SIGINT handler */
+{
+    sigalrm_flag = true;
+}
