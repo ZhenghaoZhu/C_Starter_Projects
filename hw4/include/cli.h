@@ -51,7 +51,6 @@ void legion_check_args_print_err(FILE *out, int givenArgCnt, int requiredArgCnt,
 /*  SECTION  Arg option functions */
 void legion_init();
 void legion_quit();
-void legion_free_daemon_node_head(struct daemonNode *daemonNodeHead);
 void legion_help();
 void legion_register(char *curName, char *curExe, int argCnt);
 int legion_unregister(char* curName);
@@ -63,6 +62,7 @@ void legion_logrotate(char* curDaemon);
 
 /*  SECTION  Signal Handlers */
 void sigint_handler(int sig);
+void sigtstp_handler(int sig);
 void sigchld_handler(int sig);
 void sigalrm_handler(int sig);
 

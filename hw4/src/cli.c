@@ -26,7 +26,6 @@ struct daemonNode *daemonNodeHead;
 void run_cli(FILE *in, FILE *out)
 {
     // TODO  Establish all signal handlers before doing anything
-    signal(SIGINT, sigint_handler);
     signal(SIGCHLD, sigchld_handler);
     signal(SIGALRM, sigalrm_handler);
 
@@ -39,6 +38,8 @@ void run_cli(FILE *in, FILE *out)
     daemonNodeHead->nextDaemon = NULL;
 
     while(running){
+        signal(SIGINT, sigint_handler);
+        signal(SIGTSTP, sigtstp_handler);
         char cliArgs[CLI_ARGs_MAX_LENGTH];
         fprintf(out, "%s", "legion> ");
         fflush(out);
@@ -50,15 +51,7 @@ void run_cli(FILE *in, FILE *out)
         // legion_quit(daemonNodeHead);
     }
 
-    // TODO  Free daemon structs  TODO 
-    
-    struct daemonNode *tempNode = NULL;
-    while(daemonNodeHead != NULL){
-        tempNode = daemonNodeHead;
-        daemonNodeHead = daemonNodeHead->nextDaemon;
-        free(tempNode);
-    }
-
+    return;
     // TODO  Put sf_fini()
     
 }
@@ -71,7 +64,7 @@ is no other single quote character) are treated as a single field, regardless of
 int legion_parse_args(char curStr[], FILE *out){
     char *curArg;
     char *wholeStr = curStr;
-    char *token;
+    char *token = "";
     char *beginOfArgs = NULL;
     argArrIdx = 0;
     int curIdx = 0;
@@ -82,7 +75,7 @@ int legion_parse_args(char curStr[], FILE *out){
         argsArrayLen++;
         curIdx++;
     }
-    curArg = malloc((size_t)(argsArrayLen * 2));
+    curArg = calloc((argsArrayLen * 2), sizeof(char));
     beginOfArgs = curArg;
     curIdx = 0;
 
@@ -269,15 +262,17 @@ void legion_init(){
 
 void legion_quit(){
     running = false;
-}
-
-void legion_free_daemon_node_head(struct daemonNode *daemonNodeHead){
+    // Free daemon structs
+    
     struct daemonNode *tempNode = NULL;
     while(daemonNodeHead != NULL){
         tempNode = daemonNodeHead;
         daemonNodeHead = daemonNodeHead->nextDaemon;
         free(tempNode);
     }
+
+    sf_fini();
+    _exit(0);
 }
 
 void legion_help(){
@@ -322,9 +317,9 @@ int legion_unregister(char* curName){
         if(strcmp(runnerNode->nextDaemon->daemonName, curName) == 0){
             if(runnerNode->nextDaemon->daemonStatus == status_inactive){
                 foundNode = runnerNode->nextDaemon;
-                sf_unregister(foundNode->daemonName);
                 runnerNode->nextDaemon = foundNode->nextDaemon;
-                free(runnerNode->nextDaemon);
+                sf_unregister(foundNode->daemonName);
+                free(foundNode);
                 return 1;
             }
             else {
@@ -440,17 +435,18 @@ void print_word_chars(char* curWord){
 
 /*  SECTION  Signal Handlers */
 
-void sigint_handler(int sig) /* Safe SIGINT handler */
-{
-    running = false;
+void sigint_handler(int sig){
+    legion_quit();
 }
 
-void sigchld_handler(int sig) /* Safe SIGINT handler */
-{
+void sigtstp_handler(int sig){
+    legion_quit();
+}
+
+void sigchld_handler(int sig){
     sigchld_flag = true;
 }
 
-void sigalrm_handler(int sig) /* Safe SIGINT handler */
-{
+void sigalrm_handler(int sig){
     sigalrm_flag = true;
 }
