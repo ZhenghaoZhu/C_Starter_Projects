@@ -1,11 +1,8 @@
 bin/
 build/
-<<<<<<< HEAD
-hw0.sublime-project/
-.vscode/
-hw1/test_files
-hw2/tests.out
-=======
+logs/
 *~
 *.out
->>>>>>> HW3_CODE/master
+hw1/.vscode
+hw1/test_files/
+hw4/.vscode/settings.json
