@@ -6,11 +6,12 @@
 #define DAEMON_NAME_MAX_LENGTH 100
 #define DAEMON_ARGS_MAX_LENGTH 100
 #define DAEMON_EXE_MAX_LENGTH 100
-#define CLI_ARGs_MAX_LENGTH 1000
+#define CLI_ARGS_MALLOC 1000
 #define CUR_ARG_MAX_LENGTH 1000
+#define LOGFILE_PATH_LENGTH 100
 
-#define STOP_ERROR 0
-#define STOP_SUCCESS 1
+#define LEGION_ERROR 0
+#define LEGION_SUCCESS 1
 
 #define HELP_MSG(out) do { \
 fprintf(out, "Available commands:\n" \
@@ -42,23 +43,22 @@ const char *daemon_status_map[7] = {"unknown", "inactive", "starting", "active",
 
 
 /*  SECTION  Parsing args functions */
-int legion_parse_args(char curStr[], FILE *out);
+int legion_parse_args(char *curStr, FILE *out);
 void legion_check_args(FILE *out);
 struct daemonNode* legion_daemon_name_exists(char *curName);
 void legion_check_args_print_err(FILE *out, int givenArgCnt, int requiredArgCnt, char *curArg);
 
 
 /*  SECTION  Arg option functions */
-void legion_init();
 void legion_quit();
 void legion_help();
-void legion_register(char *curName, char *curExe, int argCnt);
+int legion_register(char *curName, char *curExe, int argCnt);
 int legion_unregister(char* curName);
 struct daemonNode* legion_status(char* curName);
 void legion_status_all(FILE *out);
-void legion_start(char* curName);
+int legion_start(char* curName, char logFileVersion);
 int legion_stop(char* curName);
-void legion_logrotate(char* curDaemon);
+int legion_logrotate(char* curName);
 
 /*  SECTION  Signal Handlers */
 void sigint_handler(int sig);
@@ -69,13 +69,6 @@ void sigalrm_handler(int sig);
 /*  SECTION Helper functions to take out before submitting */
 
 // NOTE  Always use fflush(out) after priting out stuff to cli
-
-// NOTE  sf_active(char *daemon_name, pid_t pid) - To be called when a daemon process
-// has been successfully forked, the synchronization message has been received,
-// and the daemon has been placed into the active state.
-
-// NOTE  sf_stop(char *daemon_name, pid_t pid) - To be called when legion has sent a daemon
-// process a SIGTERM signal and has set it to the stopping state.
 
 // NOTE  sf_term(char *daemon_name, pid_t pid, int exit_status) - To be called when legion
 // learns (via receipt of SIGCHLD and subsequent call to waitpid(2)) that a daemon
@@ -90,11 +83,5 @@ void sigalrm_handler(int sig);
 
 
 /*
- TODO  quit - exit while loop
-
- TODO  start - start daemon using struct, change struct
-
- TODO  stop - check if it exists, stop daemon using struct, change struct
-
- TODO  logrotate - change file directory of process 
+ TODO  start - deal with yoyo
  */
