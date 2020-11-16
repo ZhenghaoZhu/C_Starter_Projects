@@ -9,6 +9,7 @@
 #define CLI_ARGS_MALLOC 1000
 #define CUR_ARG_MAX_LENGTH 1000
 #define LOGFILE_PATH_LENGTH 100
+#define SNPRINTF_MAX_LEN 1000
 
 #define LEGION_ERROR 0
 #define LEGION_SUCCESS 1
@@ -31,8 +32,7 @@ return; \
 struct daemonNode {
     char daemonName[DAEMON_NAME_MAX_LENGTH];
     char daemonExe[DAEMON_EXE_MAX_LENGTH];
-    char *daemonArgs[DAEMON_ARGS_MAX_LENGTH];
-    int numberOfArgs;
+    char daemonArgs[DAEMON_ARGS_MAX_LENGTH];
     int daemonStatus;
     pid_t daemonProcessID;
     struct daemonNode *nextDaemon;
@@ -52,7 +52,7 @@ void legion_check_args_print_err(FILE *out, int givenArgCnt, int requiredArgCnt,
 /*  SECTION  Arg option functions */
 void legion_quit();
 void legion_help();
-int legion_register(char *curName, char *curExe, int argCnt);
+int legion_register(char *curName, char *curExe, char *args);
 int legion_unregister(char* curName);
 struct daemonNode* legion_status(char* curName);
 void legion_status_all(FILE *out);

@@ -27,6 +27,7 @@ struct daemonNode *daemonNodeHead;
 void run_cli(FILE *in, FILE *out)
 {
     // TODO  Establish all signal handlers before doing anything
+    // sf_init();
     struct sigaction sigalrm_action;
     memset(&sigalrm_action, '\0', sizeof(sigalrm_action));
     sigalrm_action.sa_handler = &sigalrm_handler;
@@ -39,7 +40,6 @@ void run_cli(FILE *in, FILE *out)
     daemonNodeHead = (struct daemonNode*) malloc(sizeof(struct daemonNode));
     strncpy(daemonNodeHead->daemonName, "daemonNodeHead", DAEMON_NAME_MAX_LENGTH);
     strncpy(daemonNodeHead->daemonExe, "daemonNodeHead", DAEMON_EXE_MAX_LENGTH);
-    daemonNodeHead->numberOfArgs = 0;
     daemonNodeHead->daemonStatus = -1;
     daemonNodeHead->daemonProcessID = -1;
     daemonNodeHead->nextDaemon = NULL;
@@ -53,9 +53,9 @@ void run_cli(FILE *in, FILE *out)
             legion_parse_args(cliArgs, out);
             free(cliArgs);
         } else {
+            free(cliArgs);
             return;
         }
-        // legion_quit(daemonNodeHead);
     }
 
     return;
@@ -145,6 +145,7 @@ int legion_parse_args(char *curStr, FILE *out){
     curArg = beginOfArgs;
     legion_check_args(out);
     free(curArg);
+    // free(curStr);
     return EXIT_SUCCESS;
 }
 
@@ -164,7 +165,12 @@ void legion_check_args(FILE *out){
                 fflush(out);
             }
             else if(legion_daemon_name_exists(argArr[1]) == NULL){
-                legion_register(argArr[1], argArr[2], argArrIdx - 3);
+                if(argArr[3] != NULL){
+                    legion_register(argArr[1], argArr[2], argArr[3]);
+                }
+                else {
+                    legion_register(argArr[1], argArr[2], "");
+                }
             }
             else{
                 fprintf(out, "Daemon %s is already registered.\n", argArr[1]);
@@ -307,11 +313,11 @@ void legion_help(){
     return;
 }
 
-int legion_register(char *curName, char *curExe, int argCnt){
+int legion_register(char *curName, char *curExe, char *args){
     struct daemonNode *tempNode = (struct daemonNode*) malloc(sizeof(struct daemonNode));
     strncpy(tempNode->daemonName, curName, DAEMON_NAME_MAX_LENGTH);
     strncpy(tempNode->daemonExe, curExe, DAEMON_EXE_MAX_LENGTH);
-    tempNode->numberOfArgs = argCnt;
+    strncpy(tempNode->daemonArgs, args, DAEMON_ARGS_MAX_LENGTH);
     tempNode->daemonStatus = status_inactive;
     tempNode->daemonProcessID = 0;
     tempNode->nextDaemon = NULL;
@@ -379,14 +385,19 @@ int legion_start(char* curName, char logFileVersion){
     // char errMsg[100];
     int pipefd[2];
     pid_t childPID;
+    DIR *logDir;
     struct daemonNode *curNode = legion_daemon_name_exists(curName);
     if((curNode == NULL) || (curNode->daemonStatus != status_inactive)){
         sf_error("command execution");
         return LEGION_ERROR;
     }
 
-    if(opendir(LOGFILE_DIR) == NULL){
+    logDir = opendir(LOGFILE_DIR);
+    if(logDir == NULL){
         mkdir(LOGFILE_DIR, 0777);
+    }
+    else {
+        free(logDir);
     }
 
     curNode->daemonStatus = status_starting;
@@ -406,19 +417,18 @@ int legion_start(char* curName, char logFileVersion){
     
     if(childPID == 0){ /* Child */ 
         close(pipefd[0]); /* Close child read side */
-        char *logFilePath = calloc(LOGFILE_PATH_LENGTH, sizeof(char));
-        char *envPath = malloc(strlen(DAEMONS_DIR) + strlen(getenv(PATH_ENV_VAR) + 1));
+        char *logFilePath = malloc(strlen(LOGFILE_DIR) + strlen(curName) + 2);
+        char *envPath = malloc(strlen(DAEMONS_DIR) + strlen(getenv(PATH_ENV_VAR) + 2));
         if(getenv(PATH_ENV_VAR) == NULL){
             sf_error("Child has no PATH");
             return LEGION_ERROR;
         }
         if(envPath != NULL){
-            envPath[0] = '\0';
-            sprintf(envPath, "%s:%s", DAEMONS_DIR, getenv(PATH_ENV_VAR));
+            snprintf(envPath, SNPRINTF_MAX_LEN, "%s:%s", DAEMONS_DIR, getenv(PATH_ENV_VAR));
         }
  
         if(logFilePath != NULL){
-            sprintf(logFilePath, "%s/%s.log.%c", LOGFILE_DIR, curName, logFileVersion);
+            snprintf(logFilePath, SNPRINTF_MAX_LEN, "%s/%s.log.%c", LOGFILE_DIR, curName, logFileVersion);
         }
         setenv(PATH_ENV_VAR, envPath, 1);
         freopen(logFilePath, "a", stdout);
@@ -434,8 +444,8 @@ int legion_start(char* curName, char logFileVersion){
         }
 
         char *execEnv[2] = {getenv(PATH_ENV_VAR), NULL};
-        
-        if(execvpe(curNode->daemonExe, curNode->daemonArgs, execEnv) == -1){
+        char *argv[2] = {curNode->daemonArgs, NULL};
+        if(execvpe(curNode->daemonExe, argv, execEnv) == -1){
             sf_error("Error executing daemon");
             return LEGION_ERROR;
         }
@@ -459,15 +469,17 @@ int legion_start(char* curName, char logFileVersion){
         
         if(read(pipefd[0], buf, 1)){
             alarm(0);
+            sf_start(curNode->daemonName);
             curNode->daemonProcessID = childPID;
             curNode->daemonStatus = status_active;
-            sf_start(curNode->daemonName);
             sf_active(curNode->daemonName, curNode->daemonProcessID);
         }
 
         if(sigalrm_flag){
             sf_stop(curName, childPID);
+            curNode->daemonStatus = status_crashed;
             free(buf);
+            sigalrm_flag = false;
             return LEGION_ERROR;
         }
         close(pipefd[0]);
@@ -482,16 +494,17 @@ int legion_stop(char* curName){
     struct daemonNode *curNode = legion_daemon_name_exists(curName);
     char errMsg[100];
 
-    if(curNode == NULL || curNode->daemonStatus != status_active){
-        sf_error("command execution");
-        return LEGION_ERROR;
-    }
-
     if(curNode->daemonStatus == status_exited || curNode->daemonStatus == status_crashed){
         curNode->daemonStatus = status_inactive;
         sf_reset(curNode->daemonName);
         return LEGION_SUCCESS;
     }
+
+    if(curNode == NULL || curNode->daemonStatus != status_active){
+        sf_error("command execution");
+        return LEGION_ERROR;
+    }
+
 
     curNode->daemonStatus = status_stopping;
     sf_stop(curNode->daemonName, curNode->daemonProcessID);
@@ -513,23 +526,27 @@ int legion_stop(char* curName){
         if(curPID == -1){
             sprintf(errMsg, "WaitPID error with daemon %s.", curName);
             sf_error(errMsg);
+            curNode->daemonProcessID = 0;
+            curNode->daemonStatus = status_crashed;
             sf_crash(curNode->daemonName, curPID, WTERMSIG(status));
             return LEGION_ERROR;
         }
-        curNode->daemonStatus = status_inactive;
+        curNode->daemonStatus = status_exited;
         sigchld_flag = false;
         sf_term(curNode->daemonName, curPID, 0);
         return LEGION_SUCCESS;
     }
 
     if(sigalrm_flag){
+        sf_kill(curNode->daemonName, curNode->daemonProcessID);
         kill(curNode->daemonProcessID, SIGKILL);
         sprintf(errMsg, "Daemon %s killed with SIGKILL.", curName);
         sf_error(errMsg);
+        sigalrm_flag = false;
         return LEGION_ERROR;
     }
 
-    curNode->daemonStatus = status_inactive;
+    curNode->daemonStatus = status_exited;
     return LEGION_SUCCESS;
 
 }
@@ -564,7 +581,6 @@ int legion_logrotate(char* curName){
         while(i >= 0){
             sprintf(oldLogFilePath, "%s/%s.log.%c", LOGFILE_DIR, curName, i + '0');
             sprintf(newLogFilePath, "%s/%s.log.%c", LOGFILE_DIR, curName, i + 1 + '0');
-            debug("oldPath : %s, newPath: %s", oldLogFilePath, newLogFilePath);
             if(rename(oldLogFilePath, newLogFilePath) == -1){
                 sf_error("Unable to logrotate files");
                 return LEGION_ERROR;
@@ -573,6 +589,8 @@ int legion_logrotate(char* curName){
         }
         free(oldLogFilePath);
         free(newLogFilePath);
+        sf_logrotate(curName);
+        legion_stop(curName);
         legion_stop(curName);
         legion_start(curName, '0');
     }
@@ -580,12 +598,13 @@ int legion_logrotate(char* curName){
     else{ 
         int lastVersion = 0;
         sprintf(logFilePath, "%s/%s.log.%c", LOGFILE_DIR, curName, lastVersion + '0');
-        debug("FIRST PATH : %s", logFilePath);
         while(access(logFilePath, F_OK) == 0){
             lastVersion += 1;
             sprintf(logFilePath, "%s/%s.log.%c", LOGFILE_DIR, curName, lastVersion + '0');
         }
         sprintf(logFilePath, "%s/%s.log.%c", LOGFILE_DIR, curName, lastVersion + '0');
+        sf_logrotate(curName);
+        legion_stop(curName);
         legion_stop(curName);
         legion_start(curName, lastVersion + '0');
     }
