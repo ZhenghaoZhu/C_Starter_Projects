@@ -28,6 +28,9 @@ void run_cli(FILE *in, FILE *out)
 {
     // TODO  Establish all signal handlers before doing anything
     // sf_init();
+    if(in == NULL || out == NULL){
+        return;
+    }
     struct sigaction sigalrm_action;
     memset(&sigalrm_action, '\0', sizeof(sigalrm_action));
     sigalrm_action.sa_handler = &sigalrm_handler;
