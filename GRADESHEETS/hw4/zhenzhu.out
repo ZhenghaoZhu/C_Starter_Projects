@@ -1,0 +1,994 @@
+[----] Criterion v2.3.3
+[====] Running 4 tests from logcheck_suite:
+[RUN ] logcheck_suite::emptyspace_parse_test
+Running test logcheck_suite/emptyspace_parse_test
+                   [expect ANY]
+Waiting for connection...
+Connected to child: fd = 10
+1606921903.838398: Driver <~~ INIT (sent at 1606921903.838307)
+>>> register 'my emptyspace test' logcheck
+                   [expect ANY]
+legion> 1606921903.838474: Driver <~~ REGISTER (sent at 1606921903.838452)
+>>> start 'my emptyspace test'
+                   [expect ANY]
+legion> legion> 1606921903.840165: Driver <~~ START (sent at 1606921903.840097)
+                   [expect ANY]
+1606921903.840202: Driver <~~ ACTIVE (sent at 1606921903.840120)
+>>> stop 'my emptyspace test'
+                   [expect STOP]
+1606921903.840250: Driver <~~ STOP (sent at 1606921903.840230)
+                   [expect TERM]
+legion> 1606921903.840590: Driver <~~ TERM (sent at 1606921903.840538)
+>>> quit
+                   [expect FINI]
+1606921903.840654: Driver <~~ UNREGISTER (sent at 1606921903.840637)
+Daemon 'my emptyspace test' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test logcheck_suite/emptyspace_parse_test
+[PASS] logcheck_suite::emptyspace_parse_test: (0.02s)
+bin/legion: no process found
+[RUN ] logcheck_suite::log_exists_test
+Running test logcheck_suite/log_exists_test
+                   [expect ANY]
+Waiting for connection...
+Connected to child: fd = 10
+1606921903.879206: Driver <~~ INIT (sent at 1606921903.879116)
+>>> register my_log logcheck
+legion>                    [expect ANY]
+1606921903.879267: Driver <~~ REGISTER (sent at 1606921903.879247)
+>>> start my_log
+                   [expect ANY]
+legion> legion> 1606921903.880742: Driver <~~ START (sent at 1606921903.880676)
+                   [expect ANY]
+1606921903.880783: Driver <~~ ACTIVE (sent at 1606921903.880699)
+>>> quit
+                   [expect ANY]
+1606921903.880873: Driver <~~ STOP (sent at 1606921903.880824)
+                   [expect ANY]
+1606921903.881125: Driver <~~ TERM (sent at 1606921903.881073)
+                   [expect ANY]
+1606921903.881151: Driver <~~ UNREGISTER (sent at 1606921903.881089)
+Daemon 'my_log' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test logcheck_suite/log_exists_test
+[PASS] logcheck_suite::log_exists_test: (0.02s)
+bin/legion: no process found
+[RUN ] logcheck_suite::logrotate_test
+Running test logcheck_suite/logrotate_test
+                   [expect ANY]
+Waiting for connection...
+Connected to child: fd = 10
+1606921903.928666: Driver <~~ INIT (sent at 1606921903.928529)
+>>> register my_log_rot logcheck
+legion>                    [expect ANY]
+legion> 1606921903.928808: Driver <~~ REGISTER (sent at 1606921903.928776)
+>>> start my_log_rot
+                   [expect ANY]
+legion> 1606921903.930850: Driver <~~ START (sent at 1606921903.930766)
+                   [expect ANY]
+1606921903.930923: Driver <~~ ACTIVE (sent at 1606921903.930797)
+>>> logrotate my_log_rot
+                   [expect LOGROTATE]
+1606921903.931100: Driver <~~ LOGROTATE (sent at 1606921903.931040)
+                   [expect START]
+1606921903.931171: Driver <~~ STOP (sent at 1606921903.931056)
+1606921903.931385: Driver <~~ TERM (sent at 1606921903.931349)
+1606921903.931429: Driver <~~ RESET (sent at 1606921903.931368)
+legion> 1606921903.933421: Driver <~~ START (sent at 1606921903.933335)
+                   [expect ACTIVE]
+1606921903.933499: Driver <~~ ACTIVE (sent at 1606921903.933374)
+>>> logrotate my_log_rot
+                   [expect LOGROTATE]
+1606921903.933676: Driver <~~ LOGROTATE (sent at 1606921903.933617)
+                   [expect START]
+1606921903.933750: Driver <~~ STOP (sent at 1606921903.933632)
+1606921903.934033: Driver <~~ TERM (sent at 1606921903.933965)
+1606921903.934089: Driver <~~ RESET (sent at 1606921903.933985)
+legion> 1606921903.936134: Driver <~~ START (sent at 1606921903.936043)
+                   [expect ACTIVE]
+1606921903.936218: Driver <~~ ACTIVE (sent at 1606921903.936084)
+>>> logrotate my_log_rot
+                   [expect LOGROTATE]
+1606921903.936414: Driver <~~ LOGROTATE (sent at 1606921903.936349)
+                   [expect START]
+1606921903.936492: Driver <~~ STOP (sent at 1606921903.936366)
+1606921903.936799: Driver <~~ TERM (sent at 1606921903.936721)
+1606921903.936862: Driver <~~ RESET (sent at 1606921903.936744)
+legion> 1606921903.939093: Driver <~~ START (sent at 1606921903.938998)
+                   [expect ACTIVE]
+1606921903.939185: Driver <~~ ACTIVE (sent at 1606921903.939041)
+>>> stop my_log_rot
+                   [expect STOP]
+1606921903.939271: Driver <~~ STOP (sent at 1606921903.939246)
+                   [expect TERM]
+legion> 1606921903.939730: Driver <~~ TERM (sent at 1606921903.939691)
+>>> quit
+                   [expect FINI]
+1606921903.939844: Driver <~~ UNREGISTER (sent at 1606921903.939821)
+Daemon 'my_log_rot' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test logcheck_suite/logrotate_test
+[PASS] logcheck_suite::logrotate_test: (0.04s)
+bin/legion: no process found
+[RUN ] logcheck_suite::register_extra_arg_test
+Running test logcheck_suite/register_extra_arg_test
+                   [expect ANY]
+Waiting for connection...
+Connected to child: fd = 10
+1606921903.980368: Driver <~~ INIT (sent at 1606921903.980254)
+legion> >>> register my_extra_arg logcheck these are extra args
+                   [expect ANY]
+legion> 1606921903.980467: Driver <~~ REGISTER (sent at 1606921903.980442)
+>>> start my_extra_arg
+                   [expect ANY]
+legion> 1606921903.982178: Driver <~~ START (sent at 1606921903.982104)
+                   [expect ANY]
+1606921903.982242: Driver <~~ ACTIVE (sent at 1606921903.982131)
+>>> stop my_extra_arg
+                   [expect STOP]
+1606921903.982310: Driver <~~ STOP (sent at 1606921903.982286)
+                   [expect TERM]
+legion> 1606921903.982629: Driver <~~ TERM (sent at 1606921903.982572)
+>>> quit
+                   [expect FINI]
+1606921903.982702: Driver <~~ UNREGISTER (sent at 1606921903.982684)
+Daemon 'my_extra_arg' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test logcheck_suite/register_extra_arg_test
+1c1
+< logcheck these are extra args
+\ No newline at end of file
+---
+> these are extra args
+[----] tests/__helper.c:100: Assertion failed: The output was not what was expected (diff exited with status 1).
+[FAIL] logcheck_suite::register_extra_arg_test: (0.03s)
+bin/legion: no process found
+[====] Running 25 tests from tracker_suite:
+[RUN ] tracker_suite::crash_reset_test
+Running test tracker_suite/crash_reset_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921904.009959: Driver <~~ INIT (sent at 1606921904.009872)
+>>> register crash crash
+legion>                    [expect REGISTER]
+legion> 1606921904.010026: Driver <~~ REGISTER (sent at 1606921904.010009)
+>>> start crash
+                   [expect START]
+legion> 1606921904.011402: Driver <~~ START (sent at 1606921904.011356)
+                   [expect ACTIVE]
+1606921904.011430: Driver <~~ ACTIVE (sent at 1606921904.011382)
+>>> stop crash
+                   [expect STOP]
+1606921904.011499: Driver <~~ STOP (sent at 1606921904.011477)
+                   [expect KILL]
+Error executing command: stop 
+1606921905.011878: Driver <~~ KILL (sent at 1606921905.011782)
+                   [expect CRASH]
+1606921905.011936: Driver <~~ ERROR (sent at 1606921905.011845)
+legion> 1606921907.012219: Driver: timeout (2, 0)
+Timeout reading event from child
+Aborting test tracker_suite/crash_reset_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::crash_reset_test: (3.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::crash_test
+Running test tracker_suite/crash_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921907.081583: Driver <~~ INIT (sent at 1606921907.081498)
+>>> register crash crash
+legion>                    [expect REGISTER]
+legion> 1606921907.081685: Driver <~~ REGISTER (sent at 1606921907.081633)
+>>> start crash
+                   [expect START]
+legion> 1606921907.083798: Driver <~~ START (sent at 1606921907.083441)
+                   [expect ACTIVE]
+1606921907.083842: Driver <~~ ACTIVE (sent at 1606921907.083749)
+>>> stop crash
+                   [expect STOP]
+1606921907.083903: Driver <~~ STOP (sent at 1606921907.083879)
+                   [expect KILL]
+Error executing command: stop 
+1606921908.084307: Driver <~~ KILL (sent at 1606921908.084216)
+legion>                    [expect CRASH]
+1606921908.084360: Driver <~~ ERROR (sent at 1606921908.084297)
+1606921910.084649: Driver: timeout (2, 0)
+Timeout reading event from child
+Aborting test tracker_suite/crash_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::crash_test: (3.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::help_test
+Running test tracker_suite/help_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.155826: Driver <~~ INIT (sent at 1606921910.155750)
+>>> help
+legion> >>> quit
+                   [expect FINI]
+Available commands:
+help (0 args) Print this help message
+quit (0 args) Quit the program
+register (0 args) Register a daemon
+unregister (1 args) Unregister a daemon
+status (1 args) Show the status of a daemon
+status-all (0 args) Show the status of all daemons
+start (1 args) Start a daemon
+stop (1 args) Stop a daemon
+logrotate (1 args) Rotate log files for a daemon
+legion> 1606921910.155882: Driver <~~ FINI (sent at 1606921910.155868)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/help_test
+[PASS] tracker_suite::help_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::lazy_start_stop_multi_test
+Running test tracker_suite/lazy_start_stop_multi_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.216823: Driver <~~ INIT (sent at 1606921910.216739)
+>>> register lazy lazy
+legion>                    [expect REGISTER]
+legion> 1606921910.216885: Driver <~~ REGISTER (sent at 1606921910.216871)
+>>> start lazy
+                   [expect START]
+legion> 1606921910.218203: Driver <~~ START (sent at 1606921910.218135)
+                   [expect ACTIVE]
+1606921910.218237: Driver <~~ ACTIVE (sent at 1606921910.218159)
+>>> stop lazy
+                   [expect STOP]
+1606921910.218340: Driver <~~ STOP (sent at 1606921910.218281)
+                   [expect TERM]
+legion> 1606921910.218564: Driver <~~ TERM (sent at 1606921910.218537)
+>>> stop lazy
+                   [expect RESET]
+legion> 1606921910.218621: Driver <~~ RESET (sent at 1606921910.218601)
+>>> start lazy
+                   [expect START]
+legion> 1606921910.219965: Driver <~~ START (sent at 1606921910.219891)
+                   [expect ACTIVE]
+1606921910.220000: Driver <~~ ACTIVE (sent at 1606921910.219912)
+>>> stop lazy
+                   [expect STOP]
+1606921910.220099: Driver <~~ STOP (sent at 1606921910.220047)
+                   [expect TERM]
+legion> 1606921910.220348: Driver <~~ TERM (sent at 1606921910.220318)
+>>> stop lazy
+                   [expect RESET]
+legion> 1606921910.220418: Driver <~~ RESET (sent at 1606921910.220392)
+>>> start lazy
+                   [expect START]
+legion> 1606921910.221817: Driver <~~ START (sent at 1606921910.221767)
+                   [expect ACTIVE]
+1606921910.221865: Driver <~~ ACTIVE (sent at 1606921910.221795)
+>>> stop lazy
+                   [expect STOP]
+1606921910.221907: Driver <~~ STOP (sent at 1606921910.221899)
+                   [expect TERM]
+legion> 1606921910.222170: Driver <~~ TERM (sent at 1606921910.222147)
+>>> stop lazy
+                   [expect RESET]
+legion> 1606921910.222219: Driver <~~ RESET (sent at 1606921910.222199)
+>>> quit
+                   [expect FINI]
+1606921910.222283: Driver <~~ UNREGISTER (sent at 1606921910.222261)
+Read event type UNREGISTER, expected type FINI
+Aborting test tracker_suite/lazy_start_stop_multi_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::lazy_start_stop_multi_test: (0.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::logrotate_error_test
+Running test tracker_suite/logrotate_error_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.285182: Driver <~~ INIT (sent at 1606921910.285139)
+>>> logrotate unknown
+                   [expect ERROR]
+legion> Error executing command: logrotate 
+legion> 1606921910.285313: Driver <~~ ERROR (sent at 1606921910.285281)
+>>> quit
+                   [expect FINI]
+1606921910.285505: Driver <~~ FINI (sent at 1606921910.285348)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/logrotate_error_test
+[PASS] tracker_suite::logrotate_error_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::logrotate_lazy_test
+Running test tracker_suite/logrotate_lazy_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.347365: Driver <~~ INIT (sent at 1606921910.347333)
+>>> register lazy lazy
+                   [expect REGISTER]
+legion> legion> 1606921910.347453: Driver <~~ REGISTER (sent at 1606921910.347438)
+>>> start lazy
+                   [expect START]
+legion> 1606921910.348553: Driver <~~ START (sent at 1606921910.348480)
+                   [expect ACTIVE]
+1606921910.348580: Driver <~~ ACTIVE (sent at 1606921910.348500)
+>>> logrotate lazy
+                   [expect LOGROTATE]
+1606921910.348826: Driver <~~ LOGROTATE (sent at 1606921910.348786)
+                   [expect START]
+1606921910.348843: Driver <~~ STOP (sent at 1606921910.348795)
+1606921910.349038: Driver <~~ TERM (sent at 1606921910.348995)
+1606921910.349055: Driver <~~ RESET (sent at 1606921910.349005)
+legion> 1606921910.350029: Driver <~~ START (sent at 1606921910.349992)
+                   [expect ACTIVE]
+1606921910.350052: Driver <~~ ACTIVE (sent at 1606921910.350016)
+>>> stop lazy
+                   [expect STOP]
+1606921910.350103: Driver <~~ STOP (sent at 1606921910.350087)
+                   [expect TERM]
+legion> 1606921910.350282: Driver <~~ TERM (sent at 1606921910.350263)
+>>> quit
+                   [expect FINI]
+1606921910.350330: Driver <~~ UNREGISTER (sent at 1606921910.350315)
+Daemon 'lazy' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/logrotate_lazy_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::logrotate_lazy_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::logrotate_two_lazy_test
+Running test tracker_suite/logrotate_two_lazy_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.413750: Driver <~~ INIT (sent at 1606921910.413666)
+>>> register lazy1 lazy
+legion>                    [expect REGISTER]
+legion> 1606921910.413808: Driver <~~ REGISTER (sent at 1606921910.413789)
+>>> register lazy2 lazy
+                   [expect REGISTER]
+legion> 1606921910.413965: Driver <~~ REGISTER (sent at 1606921910.413891)
+>>> start lazy1
+                   [expect START]
+legion> 1606921910.415226: Driver <~~ START (sent at 1606921910.415187)
+                   [expect ACTIVE]
+1606921910.415249: Driver <~~ ACTIVE (sent at 1606921910.415208)
+>>> logrotate lazy1
+                   [expect LOGROTATE]
+1606921910.415473: Driver <~~ LOGROTATE (sent at 1606921910.415459)
+                   [expect START]
+1606921910.415482: Driver <~~ STOP (sent at 1606921910.415467)
+1606921910.416171: Driver <~~ TERM (sent at 1606921910.416107)
+1606921910.416199: Driver <~~ RESET (sent at 1606921910.416123)
+legion> 1606921910.417589: Driver <~~ START (sent at 1606921910.417515)
+                   [expect ACTIVE]
+1606921910.417619: Driver <~~ ACTIVE (sent at 1606921910.417544)
+>>> stop lazy1
+                   [expect STOP]
+1606921910.417745: Driver <~~ STOP (sent at 1606921910.417699)
+                   [expect TERM]
+legion> 1606921910.418016: Driver <~~ TERM (sent at 1606921910.417965)
+>>> start lazy2
+                   [expect START]
+legion> 1606921910.419419: Driver <~~ START (sent at 1606921910.419375)
+                   [expect ACTIVE]
+1606921910.419450: Driver <~~ ACTIVE (sent at 1606921910.419404)
+>>> logrotate lazy2
+                   [expect LOGROTATE]
+1606921910.419982: Driver <~~ LOGROTATE (sent at 1606921910.419733)
+                   [expect START]
+1606921910.420010: Driver <~~ STOP (sent at 1606921910.419743)
+1606921910.420053: Driver <~~ TERM (sent at 1606921910.420021)
+1606921910.420068: Driver <~~ RESET (sent at 1606921910.420035)
+legion> 1606921910.421525: Driver <~~ START (sent at 1606921910.421455)
+                   [expect ACTIVE]
+1606921910.421552: Driver <~~ ACTIVE (sent at 1606921910.421485)
+>>> stop lazy2
+                   [expect STOP]
+1606921910.421858: Driver <~~ STOP (sent at 1606921910.421607)
+                   [expect TERM]
+legion> 1606921910.421947: Driver <~~ TERM (sent at 1606921910.421882)
+>>> quit
+                   [expect FINI]
+1606921910.422059: Driver <~~ UNREGISTER (sent at 1606921910.422003)
+Daemon 'lazy2' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/logrotate_two_lazy_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::logrotate_two_lazy_test: (0.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::multi_lazy_test
+Running test tracker_suite/multi_lazy_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.483815: Driver <~~ INIT (sent at 1606921910.483746)
+>>> register lazy1 lazy
+legion>                    [expect REGISTER]
+legion> 1606921910.483876: Driver <~~ REGISTER (sent at 1606921910.483853)
+>>> register lazy2 lazy
+                   [expect REGISTER]
+legion> 1606921910.483925: Driver <~~ REGISTER (sent at 1606921910.483910)
+>>> register lazy3 lazy
+                   [expect REGISTER]
+legion> 1606921910.483966: Driver <~~ REGISTER (sent at 1606921910.483952)
+>>> start lazy1
+                   [expect START]
+legion> 1606921910.485174: Driver <~~ START (sent at 1606921910.485114)
+                   [expect ACTIVE]
+1606921910.485197: Driver <~~ ACTIVE (sent at 1606921910.485135)
+>>> start lazy2
+                   [expect START]
+legion> 1606921910.486297: Driver <~~ START (sent at 1606921910.486232)
+                   [expect ACTIVE]
+1606921910.486319: Driver <~~ ACTIVE (sent at 1606921910.486250)
+>>> start lazy3
+                   [expect START]
+legion> 1606921910.487394: Driver <~~ START (sent at 1606921910.487356)
+                   [expect ACTIVE]
+1606921910.487415: Driver <~~ ACTIVE (sent at 1606921910.487376)
+>>> stop lazy1
+                   [expect STOP]
+1606921910.487450: Driver <~~ STOP (sent at 1606921910.487438)
+                   [expect TERM]
+legion> 1606921910.487785: Driver <~~ TERM (sent at 1606921910.487732)
+>>> stop lazy2
+                   [expect STOP]
+legion> 1606921910.488078: Driver <~~ STOP (sent at 1606921910.487843)
+                   [expect TERM]
+1606921910.488097: Driver <~~ TERM (sent at 1606921910.488071)
+>>> stop lazy3
+                   [expect STOP]
+1606921910.488182: Driver <~~ STOP (sent at 1606921910.488160)
+                   [expect TERM]
+legion> 1606921910.488374: Driver <~~ TERM (sent at 1606921910.488354)
+>>> quit
+                   [expect FINI]
+1606921910.488477: Driver <~~ UNREGISTER (sent at 1606921910.488456)
+Daemon 'lazy3' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/multi_lazy_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::multi_lazy_test: (0.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::nosync_test
+Running test tracker_suite/nosync_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921910.550857: Driver <~~ INIT (sent at 1606921910.550821)
+>>> register nosync nosync
+                   [expect REGISTER]
+legion> legion> 1606921910.550978: Driver <~~ REGISTER (sent at 1606921910.550937)
+>>> start nosync
+                   [expect KILL]
+Error executing command: start 
+legion> 1606921911.551682: Driver <~~ START (sent at 1606921911.551525)
+1606921911.551719: Driver <~~ ACTIVE (sent at 1606921911.551590)
+1606921911.551732: Driver <~~ STOP (sent at 1606921911.551594)
+1606921913.552014: Driver: timeout (2, 0)
+Timeout reading event from child
+Aborting test tracker_suite/nosync_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::nosync_test: (3.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+[RUN ] tracker_suite::quit_test
+Running test tracker_suite/quit_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921913.622253: Driver <~~ INIT (sent at 1606921913.622169)
+>>> quit
+legion>                    [expect FINI]
+1606921913.622310: Driver <~~ FINI (sent at 1606921913.622290)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/quit_test
+[PASS] tracker_suite::quit_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::regi_quit_test
+Running test tracker_suite/regi_quit_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921913.680117: Driver <~~ INIT (sent at 1606921913.680043)
+>>> register lazy lazy
+legion>                    [expect REGISTER]
+legion> 1606921913.680172: Driver <~~ REGISTER (sent at 1606921913.680149)
+>>> quit
+                   [expect FINI]
+1606921913.680297: Driver <~~ UNREGISTER (sent at 1606921913.680223)
+Read event type UNREGISTER, expected type FINI
+Aborting test tracker_suite/regi_quit_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::regi_quit_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::regi_same_name_error_test
+Running test tracker_suite/regi_same_name_error_test
+                   [expect INIT]
+Waiting for connection...
+legion> Connected to child: fd = 10
+1606921913.739686: Driver <~~ INIT (sent at 1606921913.739511)
+>>> register lazy lazy
+                   [expect REGISTER]
+legion> 1606921913.739791: Driver <~~ REGISTER (sent at 1606921913.739748)
+>>> register lazy lazy
+                   [expect ERROR]
+Daemon lazy is already registered.
+Error executing command: register 
+legion> 1606921913.739867: Driver <~~ ERROR (sent at 1606921913.739836)
+>>> quit
+                   [expect FINI]
+1606921913.740052: Driver <~~ UNREGISTER (sent at 1606921913.739899)
+Read event type UNREGISTER, expected type FINI
+Aborting test tracker_suite/regi_same_name_error_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::regi_same_name_error_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::regi_unregi_mult_test
+Running test tracker_suite/regi_unregi_mult_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921913.800688: Driver <~~ INIT (sent at 1606921913.800651)
+>>> register lazy1 lazy
+                   [expect REGISTER]
+legion> legion> 1606921913.800801: Driver <~~ REGISTER (sent at 1606921913.800760)
+>>> register lazy2 lazy
+                   [expect REGISTER]
+legion> 1606921913.800864: Driver <~~ REGISTER (sent at 1606921913.800846)
+>>> register lazy3 lazy
+                   [expect REGISTER]
+legion> 1606921913.800950: Driver <~~ REGISTER (sent at 1606921913.800889)
+>>> unregister lazy1
+                   [expect UNREGISTER]
+legion> 1606921913.801005: Driver <~~ UNREGISTER (sent at 1606921913.800984)
+>>> unregister lazy2
+                   [expect UNREGISTER]
+legion> 1606921913.801086: Driver <~~ UNREGISTER (sent at 1606921913.801026)
+>>> unregister lazy3
+                   [expect UNREGISTER]
+legion> 1606921913.801129: Driver <~~ UNREGISTER (sent at 1606921913.801115)
+>>> quit
+                   [expect FINI]
+1606921913.801169: Driver <~~ FINI (sent at 1606921913.801153)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/regi_unregi_mult_test
+[PASS] tracker_suite::regi_unregi_mult_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::regi_unregi_quit_test
+Running test tracker_suite/regi_unregi_quit_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921913.859352: Driver <~~ INIT (sent at 1606921913.859309)
+>>> register lazy lazy
+                   [expect REGISTER]
+legion> legion> 1606921913.859482: Driver <~~ REGISTER (sent at 1606921913.859463)
+>>> unregister lazy
+                   [expect UNREGISTER]
+legion> 1606921913.859572: Driver <~~ UNREGISTER (sent at 1606921913.859521)
+>>> quit
+                   [expect FINI]
+1606921913.859686: Driver <~~ FINI (sent at 1606921913.859633)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/regi_unregi_quit_test
+[PASS] tracker_suite::regi_unregi_quit_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::start_error_test
+Running test tracker_suite/start_error_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921913.923586: Driver <~~ INIT (sent at 1606921913.923476)
+>>> start unknown
+legion>                    [expect ERROR]
+Error executing command: start 
+legion> 1606921913.923733: Driver <~~ ERROR (sent at 1606921913.923664)
+>>> quit
+                   [expect FINI]
+1606921913.923967: Driver <~~ FINI (sent at 1606921913.923780)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/start_error_test
+[PASS] tracker_suite::start_error_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::start_quit_test
+Running test tracker_suite/start_quit_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921913.984758: Driver <~~ INIT (sent at 1606921913.984676)
+>>> register lazy lazy
+legion>                    [expect REGISTER]
+legion> 1606921913.984834: Driver <~~ REGISTER (sent at 1606921913.984798)
+>>> start lazy
+                   [expect START]
+legion> 1606921913.986226: Driver <~~ START (sent at 1606921913.986158)
+                   [expect ACTIVE]
+1606921913.986252: Driver <~~ ACTIVE (sent at 1606921913.986181)
+>>> quit
+                   [expect STOP]
+1606921913.986513: Driver <~~ STOP (sent at 1606921913.986304)
+                   [expect TERM]
+1606921913.986598: Driver <~~ TERM (sent at 1606921913.986554)
+                   [expect FINI]
+1606921913.986615: Driver <~~ UNREGISTER (sent at 1606921913.986567)
+Daemon 'lazy' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/start_quit_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::start_quit_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::start_stop_lazy_test
+Running test tracker_suite/start_stop_lazy_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.052331: Driver <~~ INIT (sent at 1606921914.052251)
+legion> >>> register lazy lazy
+                   [expect REGISTER]
+legion> 1606921914.052426: Driver <~~ REGISTER (sent at 1606921914.052375)
+>>> start lazy
+                   [expect START]
+legion> 1606921914.053706: Driver <~~ START (sent at 1606921914.053630)
+                   [expect ACTIVE]
+1606921914.053731: Driver <~~ ACTIVE (sent at 1606921914.053651)
+>>> stop lazy
+                   [expect STOP]
+1606921914.053782: Driver <~~ STOP (sent at 1606921914.053757)
+                   [expect TERM]
+legion> 1606921914.054048: Driver <~~ TERM (sent at 1606921914.054000)
+>>> quit
+                   [expect FINI]
+1606921914.054093: Driver <~~ UNREGISTER (sent at 1606921914.054082)
+Daemon 'lazy' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/start_stop_lazy_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::start_stop_lazy_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+exec 3.001000 ms.
+[RUN ] tracker_suite::status_all_test
+Running test tracker_suite/status_all_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.112177: Driver <~~ INIT (sent at 1606921914.112137)
+>>> status-all
+>>> register lazy1 lazy
+                   [expect REGISTER]
+legion> legion> legion> 1606921914.112293: Driver <~~ REGISTER (sent at 1606921914.112251)
+>>> register lazy2 lazy
+                   [expect REGISTER]
+legion> 1606921914.112454: Driver <~~ REGISTER (sent at 1606921914.112403)
+>>> status-all
+>>> start lazy1
+                   [expect START]
+lazy2	0	inactive
+lazy1	0	inactive
+legion> legion> 1606921914.113595: Driver <~~ START (sent at 1606921914.113537)
+                   [expect ACTIVE]
+1606921914.113617: Driver <~~ ACTIVE (sent at 1606921914.113555)
+>>> status-all
+>>> start lazy2
+                   [expect START]
+lazy2	0	inactive
+lazy1	497960	active
+legion> legion> 1606921914.114825: Driver <~~ START (sent at 1606921914.114762)
+                   [expect ACTIVE]
+1606921914.114849: Driver <~~ ACTIVE (sent at 1606921914.114782)
+>>> status-all
+>>> stop lazy1
+                   [expect STOP]
+lazy2	497961	active
+lazy1	497960	active
+legion> 1606921914.114945: Driver <~~ STOP (sent at 1606921914.114929)
+                   [expect TERM]
+legion> 1606921914.115168: Driver <~~ TERM (sent at 1606921914.115152)
+>>> status-all
+>>> stop lazy2
+                   [expect STOP]
+lazy2	497961	active
+lazy1	497960	exited
+legion> 1606921914.115207: Driver <~~ STOP (sent at 1606921914.115193)
+                   [expect TERM]
+legion> 1606921914.115375: Driver <~~ TERM (sent at 1606921914.115356)
+>>> status-all
+>>> quit
+                   [expect FINI]
+lazy2	497961	exited
+lazy1	497960	exited
+legion> 1606921914.115424: Driver <~~ UNREGISTER (sent at 1606921914.115410)
+Daemon 'lazy2' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/status_all_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::status_all_test: (0.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::status_error_test
+Running test tracker_suite/status_error_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.172583: Driver <~~ INIT (sent at 1606921914.172514)
+>>> status unknown
+legion>                    [expect ERROR]
+Error executing command: status 
+legion> 1606921914.172638: Driver <~~ ERROR (sent at 1606921914.172615)
+>>> quit
+                   [expect FINI]
+1606921914.172690: Driver <~~ FINI (sent at 1606921914.172673)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/status_error_test
+[PASS] tracker_suite::status_error_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::status_test
+Running test tracker_suite/status_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.234287: Driver <~~ INIT (sent at 1606921914.234210)
+>>> register lazy lazy
+legion>                    [expect REGISTER]
+legion> 1606921914.234445: Driver <~~ REGISTER (sent at 1606921914.234333)
+>>> start lazy
+                   [expect START]
+legion> 1606921914.235678: Driver <~~ START (sent at 1606921914.235617)
+                   [expect ACTIVE]
+1606921914.235702: Driver <~~ ACTIVE (sent at 1606921914.235637)
+>>> status lazy
+>>> quit
+                   [expect STOP]
+lazy	497996	active
+legion> 1606921914.235818: Driver <~~ STOP (sent at 1606921914.235777)
+                   [expect TERM]
+1606921914.236094: Driver <~~ TERM (sent at 1606921914.236047)
+                   [expect FINI]
+1606921914.236114: Driver <~~ UNREGISTER (sent at 1606921914.236059)
+Daemon 'lazy' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/status_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::status_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::stop_error_test
+Running test tracker_suite/stop_error_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.300585: Driver <~~ INIT (sent at 1606921914.300513)
+>>> stop unknown
+legion>                    [expect ERROR]
+1606921914.400736: Driver: timeout (0, 100000)
+Timeout reading event from child
+Aborting test tracker_suite/stop_error_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::stop_error_test: (0.10s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+exec 101.456000 ms.
+[RUN ] tracker_suite::systat_start_end_test
+Running test tracker_suite/systat_start_end_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.456386: Driver <~~ INIT (sent at 1606921914.456350)
+>>> register systat systat
+                   [expect REGISTER]
+legion> legion> 1606921914.456470: Driver <~~ REGISTER (sent at 1606921914.456456)
+>>> start systat
+                   [expect START]
+legion> 1606921914.457472: Driver <~~ START (sent at 1606921914.457416)
+                   [expect ACTIVE]
+1606921914.457491: Driver <~~ ACTIVE (sent at 1606921914.457431)
+>>> stop systat
+                   [expect STOP]
+1606921914.457533: Driver <~~ STOP (sent at 1606921914.457514)
+                   [expect TERM]
+legion> 1606921914.460905: Driver <~~ TERM (sent at 1606921914.460834)
+>>> quit
+                   [expect FINI]
+1606921914.460974: Driver <~~ UNREGISTER (sent at 1606921914.460952)
+Daemon 'systat' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/systat_start_end_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::systat_start_end_test: (0.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+exec 5.679000 ms.
+[RUN ] tracker_suite::two_start_end_test
+Running test tracker_suite/two_start_end_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.514209: Driver <~~ INIT (sent at 1606921914.514176)
+>>> register lazy lazy
+                   [expect REGISTER]
+legion> legion> 1606921914.514293: Driver <~~ REGISTER (sent at 1606921914.514279)
+>>> register systat systat
+                   [expect REGISTER]
+legion> 1606921914.514348: Driver <~~ REGISTER (sent at 1606921914.514331)
+>>> start lazy
+                   [expect START]
+legion> 1606921914.515300: Driver <~~ START (sent at 1606921914.515266)
+                   [expect ACTIVE]
+1606921914.515328: Driver <~~ ACTIVE (sent at 1606921914.515281)
+>>> start systat
+                   [expect START]
+legion> 1606921914.516442: Driver <~~ START (sent at 1606921914.516378)
+                   [expect ACTIVE]
+1606921914.516464: Driver <~~ ACTIVE (sent at 1606921914.516397)
+>>> stop lazy
+                   [expect STOP]
+1606921914.516676: Driver <~~ STOP (sent at 1606921914.516489)
+                   [expect TERM]
+legion> 1606921914.516739: Driver <~~ TERM (sent at 1606921914.516719)
+>>> stop systat
+                   [expect STOP]
+1606921914.516779: Driver <~~ STOP (sent at 1606921914.516761)
+                   [expect TERM]
+legion> 1606921914.519772: Driver <~~ TERM (sent at 1606921914.519700)
+>>> quit
+                   [expect FINI]
+1606921914.519841: Driver <~~ UNREGISTER (sent at 1606921914.519821)
+Daemon 'systat' is not in active state and thus cannot be unregistered.Event tracker returned an error
+Aborting test tracker_suite/two_start_end_test
+[----] tests/__helper.c:26: Assertion failed: The test driver returned an error (-1)
+[FAIL] tracker_suite::two_start_end_test: (0.01s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::unknown_quit_test
+Running test tracker_suite/unknown_quit_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.572095: Driver <~~ INIT (sent at 1606921914.572058)
+>>> unknown
+                   [expect ERROR]
+legion> Unrecognized command: unknown 
+Error executing command: unknown 
+legion> 1606921914.572207: Driver <~~ ERROR (sent at 1606921914.572163)
+>>> quit
+                   [expect FINI]
+1606921914.572309: Driver <~~ FINI (sent at 1606921914.572256)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/unknown_quit_test
+[PASS] tracker_suite::unknown_quit_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[RUN ] tracker_suite::unreg_error_test
+Running test tracker_suite/unreg_error_test
+                   [expect INIT]
+Waiting for connection...
+Connected to child: fd = 10
+1606921914.624487: Driver <~~ INIT (sent at 1606921914.624412)
+>>> unregister unknown
+legion>                    [expect ERROR]
+Daemon unknown is not registered.
+Error executing command: unregister 
+legion> 1606921914.624550: Driver <~~ ERROR (sent at 1606921914.624525)
+>>> quit
+                   [expect FINI]
+1606921914.624643: Driver <~~ FINI (sent at 1606921914.624604)
+                   [expect EOF]
+Short count reading event
+End of test tracker_suite/unreg_error_test
+[PASS] tracker_suite::unreg_error_test: (0.00s)
+bin/legion: no process found
+crash: no process found
+lazy: no process found
+systat: no process found
+logcheck: no process found
+nosync: no process found
+[----] Writing xml report in `crit.xml`.
+[====] Synthesis: Tested: 29 | Passing: 12 | Failing: 17 | Crashing: 0 
