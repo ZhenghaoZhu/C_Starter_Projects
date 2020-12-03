@@ -51,20 +51,10 @@ int main(int argc, char* argv[]){
         perror ("sigaction");
         exit (-1);
     }
-    //printf("argv[0] = %s", argv[0]);
-    //printf("argv[1] = %s", argv[1]);
-    //printf("argv[2] = %s", argv[2]);
 
-    // Perform required initializations of the client_registry and
-    // player_registry.
     client_registry = creg_init();
     player_registry = preg_init();
 
-    // TODO: Set up the server socket and enter a loop to accept connections
-    // on this socket.  For each connection, a thread should be started to
-    // run function jeux_client_service().  In addition, you should install
-    // a SIGHUP handler, so that receipt of SIGHUP will perform a clean
-    // shutdown of the server.
     int listenfd, *connfdp;
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
