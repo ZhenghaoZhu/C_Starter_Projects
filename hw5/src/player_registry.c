@@ -25,9 +25,7 @@ PLAYER_REGISTRY *preg_init(void){
     if(pr_head == NULL){
         return NULL;
     }
-    pr_head->head = Malloc(sizeof(struct player_registry_node));
-    pr_head->head->curPlayer = NULL;
-    pr_head->head->nextPlayer = NULL;
+    pr_head->head = NULL;
     pr_head->playerCount = 0;
     if(sem_init(&(pr_head->registryLock), 0, 1) < 0){
         return NULL;
@@ -42,11 +40,12 @@ void preg_fini(PLAYER_REGISTRY *preg){
     while(preg->head != NULL){ // Free all nodes
         tempNode = preg->head;
         preg->head = preg->head->nextPlayer;
-        free(tempNode->curPlayer);
-        free(tempNode->nextPlayer);
+        // free(tempNode->curPlayer);
+        // free(tempNode->nextPlayer);
         free(tempNode);
     }
     V(&(preg->registryLock));
+    free(preg->head); // Free head itself
     free(preg); // Free registry itself
     return;
 }
@@ -66,7 +65,7 @@ PLAYER *preg_register(PLAYER_REGISTRY *preg, char *name){
         return preg_player_exists(preg, name);
     }
     struct player_registry_node* tempNode = preg->head;
-    if(tempNode->curPlayer == NULL){ // Empty list
+    if(preg->head == NULL){ // Empty list
         preg->head = newPlayerNode;
         preg->playerCount += 1;
         V(&(preg->registryLock));
@@ -83,6 +82,9 @@ PLAYER *preg_register(PLAYER_REGISTRY *preg, char *name){
 
 PLAYER* preg_player_exists(PLAYER_REGISTRY *preg, char *name){
     struct player_registry_node* tempNode = preg->head;
+    if(preg->head == NULL){
+        return NULL;
+    }
     if((tempNode->curPlayer != NULL) && (strcmp(player_get_name(tempNode->curPlayer), name) == 0)){
         return tempNode->curPlayer;
     }

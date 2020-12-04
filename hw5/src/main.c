@@ -37,9 +37,6 @@ void sighub_handler(int sig) {
  * Usage: jeux <port>
  */
 int main(int argc, char* argv[]){
-    // Option processing should be performed here.
-    // Option '-p <port>' is required in order to specify the port number
-    // on which the server should listen.
     if(argc < 3){
         fprintf(stderr, "usage: -p <port>\n");
     }
@@ -60,6 +57,7 @@ int main(int argc, char* argv[]){
     struct sockaddr_storage clientaddr;
     pthread_t tid;
     listenfd = Open_listenfd(argv[2]);
+    debug("%li: Jeux server listening on port %s", pthread_self(), argv[2]);
     while (1) {
         clientlen=sizeof(struct sockaddr_storage);
         connfdp = Malloc(sizeof(int));
@@ -68,6 +66,15 @@ int main(int argc, char* argv[]){
     }
     terminate(EXIT_FAILURE);
 }
+
+/*  TODO 
+ *
+ * - Task 4 (Server Module [server.c])
+ * - Task 5 (Invitation Module [invitation.c])
+ * - Task 6 (Client Module [client.c])
+ * - Task 9 (Game Module [game.c])
+ * 
+ */
 
 /*
  * Function called to cleanly shut down the server.
