@@ -69,7 +69,6 @@ int main(int argc, char* argv[]){
 
 /*  TODO 
  *
- * - Task 4 (Server Module [server.c])
  * - Task 5 (Invitation Module [invitation.c])
  * - Task 6 (Client Module [client.c])
  * - Task 9 (Game Module [game.c])
@@ -93,6 +92,7 @@ void terminate(int status) {
     preg_fini(player_registry);
 
     debug("%ld: Jeux server terminating", pthread_self());
+    debug("EXIT STATUS: %i", status);
     exit(status);
 }
 

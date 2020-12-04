@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include "csapp.h"
+#include "debug.h"
 
 /* 
  * The htonl() function converts the unsigned integer hostlong (uint32_t) from host byte order to network byte order.
@@ -36,6 +37,7 @@ int proto_recv_packet(int fd, JEUX_PACKET_HEADER *hdr, void **payloadp){
     if(rio_readn(fd, hdr, sizeof(JEUX_PACKET_HEADER)) <= 0){
         return -1;
     }
+    debug("In proto_recv_packet");
     uint16_t payLoadSize = ntohs(hdr->size);
     if(payLoadSize != 0){
         *payloadp = malloc(payLoadSize);

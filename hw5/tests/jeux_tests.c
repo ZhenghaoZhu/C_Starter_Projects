@@ -37,7 +37,7 @@ Test(student_suite, 00_start_server, .timeout = 30) {
     cr_assert_neq(WEXITSTATUS(ret), 0, "Server was already running");
     fprintf(stderr, "Starting server...");
     if((server_pid = fork()) == 0) {
-	execlp("valgrind", "jeux", "--leak-check=full", "--track-fds=yes", "--track-origins=yes"
+	execlp("valgrind", "jeux", "--leak-check=full", "--track-fds=yes", "--show-leak-kinds=all",
 	       "--error-exitcode=37", "--log-file=valgrind.out", "bin/jeux", "-p", "9999", NULL);
 	fprintf(stderr, "Failed to exec server\n");
 	abort();
@@ -63,7 +63,6 @@ Test(student_suite, 00_start_server, .timeout = 30) {
     if(WEXITSTATUS(ret) == 37)
 	system("cat valgrind.out");
     cr_assert_neq(WEXITSTATUS(ret), 37, "Valgrind reported errors");
-    printf("SERVER EXIT STATUS: %i \n", WEXITSTATUS(ret));
     cr_assert_eq(WEXITSTATUS(ret), 0, "Server exit status was not 0");
 }
 

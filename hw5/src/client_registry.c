@@ -1,4 +1,4 @@
-    #include <stddef.h>
+#include <stddef.h>
 #include <stdbool.h>
 #include <math.h>
 #include <pthread.h>
@@ -42,6 +42,17 @@ CLIENT_REGISTRY *creg_init(){
 
 void creg_fini(CLIENT_REGISTRY *cr){
     debug("%li: Finalize client registry", pthread_self());
+    //  TODO  Free all nodes
+    struct client_registry_node* tempNode = cr->head;
+    if(cr->head == NULL){
+        return;
+    }
+    while(tempNode != NULL){
+        cr->head = cr->head->nextClient;
+        free(tempNode->curClient);
+        free(tempNode);
+        tempNode = cr->head;
+    }
     free(cr->head); // Free head itself
     free(cr); // Free registry
     return;
@@ -65,8 +76,8 @@ CLIENT *creg_register(CLIENT_REGISTRY *cr, int fd){
     if(cr->head == NULL){ // Empty List
         cr->head = newClientNode;
         cr->clientCount += 1;
-        debug("Registered client %p with fd[%i]", newClient, fd);
-        debug("fd of head client %i", client_get_fd(cr->head->curClient));
+        debug("1 Registered client %p with fd[%i]", newClient, fd);
+        debug("1 fd of head client %i", client_get_fd(cr->head->curClient));
         P(&(cr->notEmpty));
         V(&(cr->registryLock));
         return newClient;
@@ -90,19 +101,18 @@ int creg_unregister(CLIENT_REGISTRY *cr, CLIENT *client){
     struct client_registry_node* prevNode = NULL;
     int crFd = 0;
     int clientFd = 0;
-    client_unref(client, "Unregistering client from registry");
+    clientFd = client_get_fd(client);
     if(cr->head != NULL && cr->head->curClient != NULL){
         crFd = client_get_fd(cr->head->curClient);
-        clientFd = client_get_fd(client);
         if(crFd == clientFd){
             cr->head = cr->head->nextClient;
             cr->clientCount -= 1;
+            client_unref(client, "Unregistering client from registry");
             if(cr->clientCount == 0){
                 V(&(cr->notEmpty)); // Tell wait_for_empty to continue
             }
-            debug("CURRENT COUNT OF CLIENTS %i", cr->clientCount);
             V(&(cr->registryLock));
-            debug("1 Successfully unregistered %p from registry %p", client, cr);
+            debug("Successfully unregistered %p from registry %p", client, cr);
             return 0;
         }
     }
@@ -111,12 +121,13 @@ int creg_unregister(CLIENT_REGISTRY *cr, CLIENT *client){
         if(crFd == clientFd){
             prevNode->nextClient = tempNode->nextClient;
             cr->clientCount -= 1;
+            client_unref(client, "Unregistering client from registry");
             if(cr->clientCount == 0){
                 V(&(cr->notEmpty)); // Tell wait_for_empty to continue
             }
             debug("CURRENT COUNT OF CLIENTS %i", cr->clientCount);
             V(&(cr->registryLock));
-            debug("2 Successfully unregistered %p from registry %p", client, cr);
+            debug("Successfully unregistered %p from registry %p", client, cr);
             return 0;
         }
         prevNode = tempNode;
@@ -171,7 +182,7 @@ PLAYER **creg_all_players(CLIENT_REGISTRY *cr){
     int count = 0;
     debug("IN ALL PLAYERS %p", cr->head->curClient);
     while(tempNode != NULL && tempNode->curClient != NULL){
-        player_ref(client_get_player(tempNode->curClient), "Adding to all players array");
+        // player_ref(client_get_player(tempNode->curClient), "Adding to all players array");
         player_array[count] = client_get_player(tempNode->curClient);
         player_unref(client_get_player(tempNode->curClient), "Finished adding to all players array");
         debug("PLAYER %p added to array", tempNode->curClient);
@@ -205,6 +216,14 @@ void creg_shutdown_all(CLIENT_REGISTRY *cr){
     }
     // cr->clientCount = 0;
     V(&(cr->registryLock));
+    // P(&(cr->registryLock));
+    tempNode = cr->head;
+    while(tempNode != NULL){
+        creg_unregister(cr, tempNode->curClient);
+        tempNode = tempNode->nextClient;
+    }
+    // cr->clientCount = 0;
+    // V(&(cr->registryLock));
     debug("Finished shutting down all clients in %p", cr);
     return;
 }	
