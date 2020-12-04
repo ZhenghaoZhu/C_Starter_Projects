@@ -35,16 +35,7 @@ PLAYER_REGISTRY *preg_init(void){
 }
 
 void preg_fini(PLAYER_REGISTRY *preg){
-    struct player_registry_node* tempNode;
-    P(&(preg->registryLock));
-    while(preg->head != NULL){ // Free all nodes
-        tempNode = preg->head;
-        preg->head = preg->head->nextPlayer;
-        // free(tempNode->curPlayer);
-        // free(tempNode->nextPlayer);
-        free(tempNode);
-    }
-    V(&(preg->registryLock));
+    debug("%li: Finalize player registry", pthread_self());
     free(preg->head); // Free head itself
     free(preg); // Free registry itself
     return;

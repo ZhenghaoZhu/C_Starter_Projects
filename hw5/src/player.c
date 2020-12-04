@@ -13,12 +13,12 @@ typedef struct player {
     char playerName[NAME_MAX_LENGTH];
     int refCount;
     int rating;
-    pthread_mutex_t playerLock;
+    sem_t playerLock;
 } PLAYER;
 
 PLAYER *player_create(char *name){
     PLAYER* newPlayer = (PLAYER*) Calloc(1, sizeof(PLAYER));
-    if(pthread_mutex_init(&(newPlayer->playerLock), NULL) != 0){
+    if(sem_init(&(newPlayer->playerLock), 0, 1) != 0){
         free(newPlayer);
         return NULL;
     }
@@ -33,12 +33,12 @@ PLAYER *player_ref(PLAYER *player, char *why){
     if(player == NULL){
         return NULL;
     }
-    pthread_mutex_lock(&(player->playerLock));
+    P(&(player->playerLock));
     player->refCount += 1;
     debug("%li: %s (%i -> %i)", pthread_self(), why, player->refCount - 1, player->refCount);
     player->refCount += 1;
     debug("%li: %s (%i -> %i)", pthread_self(), why, player->refCount - 1, player->refCount);
-    pthread_mutex_unlock(&(player->playerLock));
+    V(&(player->playerLock));
     return player;
 }
 
@@ -47,11 +47,11 @@ void player_unref(PLAYER *player, char *why){
         return;
     }
     bool isZero = false;
-    pthread_mutex_lock(&(player->playerLock));
+    P(&(player->playerLock));
     player->refCount -= 1;
     debug("%li: %s (%i -> %i)", pthread_self(), why, player->refCount + 1, player->refCount);
     isZero = (player->refCount == 0);
-    pthread_mutex_unlock(&(player->playerLock));
+    V(&(player->playerLock));
     if(isZero){
         debug("Player %p reference count reached zero, freeing player", player);
         free(player);
@@ -91,13 +91,13 @@ void player_post_result(PLAYER *player1, PLAYER *player2, int result){
         S2 = 1;
     }
 
-    pthread_mutex_lock(&(player1->playerLock));
+    P(&(player1->playerLock));
     R1 = player1->rating;
-    pthread_mutex_unlock(&(player1->playerLock));
+    V(&(player1->playerLock));
 
-    pthread_mutex_lock(&(player2->playerLock));
+    P(&(player2->playerLock));
     R2 = player2->rating;
-    pthread_mutex_unlock(&(player2->playerLock));
+    V(&(player2->playerLock));
 
     E1 = 1 + pow(10, ((R2-R1)/400));
     E1 = 1/E1;
@@ -106,13 +106,13 @@ void player_post_result(PLAYER *player1, PLAYER *player2, int result){
     newR1 = R1 + (32*(S1 - E1));
     newR2 = R2 + (32*(S2 - E2));
 
-    pthread_mutex_lock(&(player1->playerLock));
+    P(&(player1->playerLock));
     player1->rating = newR1;
-    pthread_mutex_unlock(&(player1->playerLock));
+    V(&(player1->playerLock));
 
-    pthread_mutex_lock(&(player2->playerLock));
+    P(&(player2->playerLock));
     player2->rating = newR2;
-    pthread_mutex_unlock(&(player2->playerLock));
+    V(&(player2->playerLock));
 
     return;
 }
