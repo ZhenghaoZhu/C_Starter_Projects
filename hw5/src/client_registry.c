@@ -49,7 +49,7 @@ void creg_fini(CLIENT_REGISTRY *cr){
     }
     while(tempNode != NULL){
         cr->head = cr->head->nextClient;
-        free(tempNode->curClient);
+        debug("Freeing client node %p", tempNode);
         free(tempNode);
         tempNode = cr->head;
     }
@@ -98,14 +98,14 @@ int creg_unregister(CLIENT_REGISTRY *cr, CLIENT *client){
     debug("Trying to unregister %p from registry %p", client, cr);
     P(&(cr->registryLock));
     struct client_registry_node* tempNode = cr->head;
-    struct client_registry_node* prevNode = NULL;
+    // struct client_registry_node* prevNode = NULL;
     int crFd = 0;
     int clientFd = 0;
     clientFd = client_get_fd(client);
     if(cr->head != NULL && cr->head->curClient != NULL){
         crFd = client_get_fd(cr->head->curClient);
         if(crFd == clientFd){
-            cr->head = cr->head->nextClient;
+            // cr->head = cr->head->nextClient;
             cr->clientCount -= 1;
             client_unref(client, "Unregistering client from registry");
             if(cr->clientCount == 0){
@@ -119,7 +119,7 @@ int creg_unregister(CLIENT_REGISTRY *cr, CLIENT *client){
     while(tempNode != NULL){
         crFd = client_get_fd(tempNode->curClient);
         if(crFd == clientFd){
-            prevNode->nextClient = tempNode->nextClient;
+            // prevNode->nextClient = tempNode->nextClient;
             cr->clientCount -= 1;
             client_unref(client, "Unregistering client from registry");
             if(cr->clientCount == 0){
@@ -130,7 +130,7 @@ int creg_unregister(CLIENT_REGISTRY *cr, CLIENT *client){
             debug("Successfully unregistered %p from registry %p", client, cr);
             return 0;
         }
-        prevNode = tempNode;
+        // prevNode = tempNode;
         tempNode = tempNode->nextClient;
     }
     debug("%p not found in %p", client, cr);
@@ -182,7 +182,7 @@ PLAYER **creg_all_players(CLIENT_REGISTRY *cr){
     int count = 0;
     debug("IN ALL PLAYERS %p", cr->head->curClient);
     while(tempNode != NULL && tempNode->curClient != NULL){
-        // player_ref(client_get_player(tempNode->curClient), "Adding to all players array");
+        player_ref(client_get_player(tempNode->curClient), "Adding to all players array");
         player_array[count] = client_get_player(tempNode->curClient);
         player_unref(client_get_player(tempNode->curClient), "Finished adding to all players array");
         debug("PLAYER %p added to array", tempNode->curClient);

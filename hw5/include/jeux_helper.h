@@ -6,6 +6,8 @@ in the present implementation this consists of the player's name and rating. */
 #include "player_registry.h"
 
 #define NAME_MAX_LENGTH 100
+#define GAME_BOARD_LENGTH 9
+#define GAME_BOARD_STATE_LENGTH 35
 
 void* mainListeningThread(void *vargp);
 void handle_SIGHUP(int signum);

@@ -69,7 +69,6 @@ int main(int argc, char* argv[]){
 
 /*  TODO 
  *
- * - Task 5 (Invitation Module [invitation.c])
  * - Task 6 (Client Module [client.c])
  * - Task 9 (Game Module [game.c])
  * 
