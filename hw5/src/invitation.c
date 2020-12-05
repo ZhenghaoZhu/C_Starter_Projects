@@ -4,13 +4,14 @@
 #include <pthread.h>
 
 #include "client_registry.h"
-#include "semaphore.h"
-#include "csapp.h"
-#include "jeux_helper.h"
-#include "debug.h"
-#include "client.h"
+#include "player_registry.h"
 #include "invitation.h"
-#include "game.h"
+#include "client.h"
+#include "player.h"
+#include "server.h"
+#include "csapp.h"
+#include "debug.h"
+#include "protocol.h"
 
 typedef struct invitation{
     GAME* invGame;
@@ -24,6 +25,9 @@ typedef struct invitation{
 } INVITATION;
 
 INVITATION *inv_create(CLIENT *source, CLIENT *target, GAME_ROLE source_role, GAME_ROLE target_role){
+    if(source == NULL || target == NULL){
+        return NULL;
+    }
     if(client_get_fd(source) == client_get_fd(target)){
         return NULL;
     }

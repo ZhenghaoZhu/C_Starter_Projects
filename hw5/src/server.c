@@ -5,13 +5,13 @@
 #include <time.h>
 
 #include "client_registry.h"
+#include "player_registry.h"
 #include "csapp.h"
 #include "jeux_helper.h"
 #include "jeux_globals.h"
-#include "debug.h"
-#include "client.h"
 #include "server.h"
-#include "protocol.h"
+#include "debug.h"
+
 
 void *jeux_client_service(void *arg){
     int* intArg = (int*) arg;
@@ -48,6 +48,7 @@ void *jeux_client_service(void *arg){
                     fflush(stderr);
                     client_send_nack(curClient);
                 }
+                free(payload);
                 break;
 
             case JEUX_USERS_PKT:
@@ -107,6 +108,7 @@ void *jeux_client_service(void *arg){
                     fflush(stderr);
                     client_send_nack(curClient);
                 }
+                free(payload);
                 break;
 
             case JEUX_REVOKE_PKT:
@@ -175,6 +177,7 @@ void *jeux_client_service(void *arg){
                     debug("Received JEUX_MOVE_PKT");
                     if((client_make_move(curClient, hdr.id, payload)) == 0){ // TODO 
                         client_send_ack(curClient, NULL, 0);
+                        free(payload);
                     }
                     else{
                         client_send_nack(curClient);

@@ -52,7 +52,7 @@ void preg_fini(PLAYER_REGISTRY *preg){
 }
 
 PLAYER *preg_register(PLAYER_REGISTRY *preg, char *name){
-    debug("Register player %s", name);
+    debug("Register player");
     PLAYER* newPlayer = player_create(name);
     struct player_registry_node* newPlayerNode = (struct player_registry_node*) Malloc(sizeof(struct player_registry_node));
     newPlayerNode->curPlayer = newPlayer;

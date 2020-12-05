@@ -3,11 +3,13 @@
 #include <math.h>
 #include <pthread.h>
 
-#include "player.h"
-#include "semaphore.h"
+#include "client_registry.h"
+#include "player_registry.h"
 #include "csapp.h"
-#include "jeux_helper.h"
+#include "player.h"
+#include "jeux_globals.h"
 #include "debug.h"
+#include "jeux_helper.h"
 
 typedef struct player {
     char playerName[NAME_MAX_LENGTH];
@@ -22,7 +24,7 @@ PLAYER *player_create(char *name){
         free(newPlayer);
         return NULL;
     }
-    strncpy(newPlayer->playerName, name, strlen(name));
+    strcat(newPlayer->playerName, name);
     newPlayer->refCount = 1;
     newPlayer->rating = PLAYER_INITIAL_RATING;
     // debug("New Player Created %p, Name %s", newPlayer, newPlayer->playerName);
@@ -74,6 +76,7 @@ int player_get_rating(PLAYER *player){
 }
 
 void player_post_result(PLAYER *player1, PLAYER *player2, int result){
+    debug("player_post_result with result %i", result);
     double S1, S2;
     double E1, E2;
     int R1, R2;

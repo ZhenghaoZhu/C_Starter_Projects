@@ -4,9 +4,7 @@
 #include <pthread.h>
 
 #include "client_registry.h"
-#include "semaphore.h"
 #include "csapp.h"
-#include "jeux_helper.h"
 #include "debug.h"
 #include "client.h"
 
@@ -31,9 +29,11 @@ CLIENT_REGISTRY *creg_init(){
     cr_head->head = NULL;
     cr_head->clientCount = 0;
     if(sem_init(&(cr_head->registryLock), 0, 1) < 0){
+        free(cr_head);
         return NULL;
     }
     if(sem_init(&(cr_head->notEmpty), 0, 1) < 0){
+        free(cr_head);
         return NULL;
     }
     debug("%li: Initialize client registry", pthread_self());
@@ -155,7 +155,7 @@ CLIENT *creg_lookup(CLIENT_REGISTRY *cr, char *user){
         debug("Exiting creg_lookup");
         return cr->head->curClient;
     }
-    while(tempNode->curClient != NULL){ // Check middle nodes
+    while(tempNode != NULL){ // Check middle nodes
         tempPlayer = client_get_player(tempNode->curClient);
         if(strcmp(player_get_name(tempPlayer), user) == 0){
             V(&(cr->registryLock));
@@ -182,7 +182,7 @@ PLAYER **creg_all_players(CLIENT_REGISTRY *cr){
     int count = 0;
     debug("IN ALL PLAYERS %p", cr->head->curClient);
     while(tempNode != NULL && tempNode->curClient != NULL){
-        player_ref(client_get_player(tempNode->curClient), "Adding to all players array");
+        // player_ref(client_get_player(tempNode->curClient), "Adding to all players array");
         player_array[count] = client_get_player(tempNode->curClient);
         player_unref(client_get_player(tempNode->curClient), "Finished adding to all players array");
         debug("PLAYER %p added to array", tempNode->curClient);
