@@ -1,0 +1,201 @@
+[----] Criterion v2.3.3
+[====] Running 10 tests from client_registry_suite:
+[RUN ] client_registry_suite::basic_one_registry
+[RUN ] client_registry_suite::all_players_empty
+[RUN ] client_registry_suite::all_players_nonempty
+[RUN ] client_registry_suite::basic_one_registry_premature
+[PASS] client_registry_suite::all_players_nonempty: (0.00s)
+[PASS] client_registry_suite::all_players_empty: (0.00s)
+[PASS] client_registry_suite::basic_one_registry: (0.00s)
+[RUN ] client_registry_suite::basic_two_registries
+[RUN ] client_registry_suite::lookup_null
+[RUN ] client_registry_suite::many_threads_one_registry
+[PASS] client_registry_suite::lookup_null: (0.00s)
+[RUN ] client_registry_suite::many_threads_one_registry_premature
+[FAIL] client_registry_suite::basic_one_registry_premature: Timed out. (5.00s)
+[RUN ] client_registry_suite::register_login_lookup_not_null
+[PASS] client_registry_suite::register_login_lookup_not_null: (0.00s)
+[FAIL] client_registry_suite::basic_two_registries: Timed out. (5.00s)
+[====] Running 15 tests from client_suite:
+[RUN ] client_registry_suite::register_login_lookup_null
+[RUN ] client_suite::invite
+[----] tests/client_test.c:223: Assertion failed: Client module was not implemented
+[PASS] client_registry_suite::register_login_lookup_null: (0.00s)
+[FAIL] client_suite::invite: (0.00s)
+[RUN ] client_suite::invite_accept
+[----] tests/client_test.c:396: Assertion failed: Client module was not implemented
+[RUN ] client_suite::invite_accept_move
+[FAIL] client_suite::invite_accept: (0.00s)
+[----] tests/client_test.c:502: Assertion failed: Client module was not implemented
+[FAIL] client_suite::invite_accept_move: (0.00s)
+[RUN ] client_suite::invite_accept_resign_source
+[----] tests/client_test.c:427: Assertion failed: Client module was not implemented
+[RUN ] client_suite::invite_accept_resign_target
+[FAIL] client_suite::invite_accept_resign_source: (0.00s)
+[----] tests/client_test.c:465: Assertion failed: Client module was not implemented
+[FAIL] client_suite::invite_accept_resign_target: (0.00s)
+[RUN ] client_suite::invite_decline
+[RUN ] client_suite::invite_decline_wrong
+[----] tests/client_test.c:247: Assertion failed: Client module was not implemented
+[----] tests/client_test.c:307: Assertion failed: Client module was not implemented
+[FAIL] client_suite::invite_decline: (0.00s)
+[FAIL] client_suite::invite_decline_wrong: (0.00s)
+[RUN ] client_suite::invite_resign_wrong
+[----] tests/client_test.c:367: Assertion failed: Client module was not implemented
+[FAIL] client_suite::invite_resign_wrong: (0.00s)
+[RUN ] client_suite::invite_revoke
+[----] tests/client_test.c:276: Assertion failed: Client module was not implemented
+[FAIL] client_suite::invite_revoke: (0.00s)
+[RUN ] client_suite::invite_revoke_wrong
+[----] tests/client_test.c:337: Assertion failed: Client module was not implemented
+[FAIL] client_suite::invite_revoke_wrong: (0.01s)
+[RUN ] client_suite::login_logout
+[----] tests/client_test.c:136: Assertion failed: Client module was not implemented
+[FAIL] client_suite::login_logout: (0.00s)
+[RUN ] client_suite::random_invite_revoke
+[RUN ] client_suite::send_ack
+[----] tests/client_test.c:573: Assertion failed: Client module was not implemented
+[----] tests/client_test.c:180: Assertion failed: Client module was not implemented
+[FAIL] client_suite::random_invite_revoke: (0.00s)
+[FAIL] client_suite::send_ack: (0.00s)
+[RUN ] client_suite::send_nack
+[----] tests/client_test.c:203: Assertion failed: Client module was not implemented
+[RUN ] client_suite::send_packet
+[FAIL] client_suite::send_nack: (0.00s)
+[----] tests/client_test.c:156: Assertion failed: Client module was not implemented
+[FAIL] client_suite::send_packet: (0.00s)
+[====] Running 9 tests from game_suite:
+[RUN ] game_suite::create
+[RUN ] game_suite::drawing_sequence
+[PASS] game_suite::create: (0.00s)
+[PASS] game_suite::drawing_sequence: (0.00s)
+[RUN ] game_suite::illegal_move
+[PASS] game_suite::illegal_move: (0.00s)
+[RUN ] game_suite::legal_moves
+[PASS] game_suite::legal_moves: (0.00s)
+[RUN ] game_suite::parse_move_wrong_player
+[PASS] game_suite::parse_move_wrong_player: (0.00s)
+[RUN ] game_suite::parse_unparse_move
+[RUN ] game_suite::random_moves
+[----] tests/game_test.c:178: Assertion failed: Returned value was not NULL
+[FAIL] game_suite::parse_unparse_move: (0.00s)
+[----] tests/game_test.c:416: Assertion failed: Game winner (0) does not match expected (1) in game 0
+[RUN ] game_suite::resign
+[FAIL] game_suite::random_moves: (0.01s)
+[----] tests/game_test.c:74: Assertion failed: Resigned game should be over
+[FAIL] game_suite::resign: (0.00s)
+[====] Running 8 tests from invitation_suite:
+[RUN ] game_suite::winning_sequence
+[----] tests/game_test.c:222: Assertion failed: Returned value was not -1
+[RUN ] invitation_suite::concurrent_resign
+[FAIL] game_suite::winning_sequence: (0.00s)
+[RUN ] invitation_suite::create_accept
+[PASS] invitation_suite::create_accept: (0.00s)
+[RUN ] invitation_suite::create_accept_close
+[----] tests/invitation_test.c:154: Assertion failed: Returned value (0) was not -1
+[FAIL] invitation_suite::create_accept_close: (0.01s)
+[RUN ] invitation_suite::create_accept_resign
+[----] tests/invitation_test.c:183: Assertion failed: The game should be over after a player resigns
+[FAIL] invitation_suite::create_accept_resign: (0.00s)
+[RUN ] invitation_suite::create_close
+[PASS] invitation_suite::create_close: (0.00s)
+[RUN ] invitation_suite::create_close_close
+[PASS] invitation_suite::create_close_close: (0.00s)
+[RUN ] invitation_suite::create_different_clients
+[PASS] invitation_suite::create_different_clients: (0.00s)
+[RUN ] invitation_suite::create_same_client
+[PASS] invitation_suite::create_same_client: (0.00s)
+[====] Running 4 tests from player_registry_suite:
+[RUN ] player_registry_suite::many_threads_one_registry
+[----] tests/player_registry_test.c:123: Assertion failed: Returned player (0x7f5ee4000ea0) did not match expected (0x7f5eec000f20)
+[----] tests/player_registry_test.c:123: Assertion failed: Returned player (0x7f5eec000fe0) did not match expected (0x7f5edc000f40)
+[----] tests/player_registry_test.c:123: Assertion failed: Returned player (0x7f5eec000fe0) did not match expected (0x7f5edc000f40)
+[FAIL] player_registry_suite::many_threads_one_registry: (0.03s)
+*** stack smashing detected ***: terminated
+[----] tests/player_registry_test.c:123: Assertion failed: Returned player (0x7f5eec000fe0) did not match expected (0x7f5edc000f40)
+[----] tests/invitation_test.c:216: Unexpected signal caught below this line!
+[FAIL] invitation_suite::concurrent_resign: CRASH!
+[RUN ] player_registry_suite::one_registry_one_player
+[PASS] player_registry_suite::one_registry_one_player: (0.00s)
+[RUN ] player_registry_suite::one_registry_three_players
+[PASS] player_registry_suite::one_registry_three_players: (0.00s)
+[RUN ] player_registry_suite::two_registries_two_players
+[PASS] player_registry_suite::two_registries_two_players: (0.00s)
+[====] Running 5 tests from player_suite:
+[RUN ] player_suite::concurrent_post
+[----] Warning! The test `player_registry_suite::many_threads_one_registry` crashed during its setup or teardown.
+[RUN ] player_suite::create
+[PASS] player_suite::create: (0.00s)
+[RUN ] player_suite::post_result_draw
+[PASS] player_suite::post_result_draw: (0.00s)
+[RUN ] player_suite::post_result_first
+[PASS] player_suite::post_result_first: (0.00s)
+[RUN ] player_suite::post_result_series
+[----] tests/player_test.c:104: Assertion failed: Player rating (1516) does not match expected (1515)
+[FAIL] player_suite::post_result_series: (0.00s)
+[====] Running 9 tests from protocol_suite:
+[RUN ] protocol_suite::recv_empty
+[PASS] protocol_suite::recv_empty: (0.00s)
+[RUN ] protocol_suite::recv_error
+[PASS] protocol_suite::recv_error: (0.00s)
+[RUN ] protocol_suite::recv_no_payload
+[PASS] protocol_suite::recv_no_payload: (0.00s)
+[RUN ] protocol_suite::recv_short_header
+[----] tests/protocol_test.c:186: Assertion failed: Returned value was 0
+[FAIL] protocol_suite::recv_short_header: (0.00s)
+[RUN ] protocol_suite::recv_short_payload
+[----] tests/protocol_test.c:209: Assertion failed: Returned value was 0
+[FAIL] protocol_suite::recv_short_payload: (0.00s)
+[RUN ] protocol_suite::recv_with_payload
+[PASS] protocol_suite::recv_with_payload: (0.00s)
+[RUN ] protocol_suite::send_error
+[PASS] protocol_suite::send_error: (0.00s)
+[RUN ] protocol_suite::send_no_payload
+[PASS] protocol_suite::send_no_payload: (0.00s)
+[RUN ] protocol_suite::send_with_payload
+[PASS] protocol_suite::send_with_payload: (0.00s)
+[====] Running 11 tests from server_suite:
+[RUN ] server_suite::invite_accept_first
+[PASS] server_suite::invite_accept_first: (0.01s)
+[RUN ] server_suite::invite_accept_move
+[PASS] server_suite::invite_accept_move: (0.00s)
+[RUN ] server_suite::invite_accept_resign
+[----] tests/server_test.c:80: Assertion failed: Packet type (ENDED) was not the expected type (RESIGNED)
+[FAIL] server_suite::invite_accept_resign: (0.01s)
+[RUN ] server_suite::invite_accept_second
+[PASS] server_suite::invite_accept_second: (0.01s)
+[RUN ] server_suite::invite_decline
+[PASS] server_suite::invite_decline: (0.01s)
+[RUN ] server_suite::invite_disconnect
+[PASS] server_suite::invite_disconnect: (0.00s)
+[RUN ] server_suite::invite_revoke
+[PASS] server_suite::invite_revoke: (0.00s)
+[RUN ] server_suite::login_many_users
+realloc(): invalid next size
+[----] tests/server_test.c:596: Unexpected signal caught below this line!
+[FAIL] server_suite::login_many_users: CRASH!
+[RUN ] server_suite::login_users
+[PASS] server_suite::login_users: (0.00s)
+[RUN ] server_suite::ping
+ERROR[PASS] server_suite::ping: (0.00s)
+[RUN ] server_suite::valid_login
+[PASS] server_suite::valid_login: (0.00s)
+[====] Running 2 tests from student_suite:
+[RUN ] student_suite::00_start_server
+server_suite/00_start_server
+Starting server...pid = 3544308
+[----] tests/player_test.c:163: Assertion failed: The sum of player ratings (9311) did not match the expected value (150000)
+[FAIL] player_suite::concurrent_post: (2.25s)
+[RUN ] student_suite::01_connect
+server_suite/01_connect
+Connected to server localhost:9999
+[PASS] student_suite::01_connect: (0.01s)
+Sending SIGHUP to server pid 3544308
+Server wait() returned = 0x0
+[PASS] student_suite::00_start_server: (15.03s)
+[----] tests/client_registry_test.c:288: Unexpected signal caught below this line!
+[FAIL] client_registry_suite::many_threads_one_registry: CRASH!
+[----] tests/client_registry_test.c:313: Unexpected signal caught below this line!
+[FAIL] client_registry_suite::many_threads_one_registry_premature: CRASH!
+[----] Writing xml report in `crit.xml`.
+[====] Synthesis: Tested: 73 | Passing: 40 | Failing: 33 | Crashing: 4 

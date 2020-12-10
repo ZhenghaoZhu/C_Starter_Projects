@@ -1,0 +1,80 @@
+Graded Commit:a80a7b835e0d9cf3fbc3e7d9f705c32079b45992
+
+TEST NAME, POINTS,OUT OF
+client_registry_suite/all_players_empty,1,1,
+client_registry_suite/all_players_nonempty,1,1,
+client_registry_suite/basic_one_registry,1,1,
+client_registry_suite/basic_one_registry_premature,0,1,The test timed out.: None
+client_registry_suite/basic_two_registries,0,1,The test timed out.: None
+client_registry_suite/lookup_null,1,1,
+client_registry_suite/many_threads_one_registry,0,1,The test crashed.: None
+client_registry_suite/many_threads_one_registry_premature,0,1,The test crashed.: None
+client_registry_suite/register_login_lookup_not_null,1,1,
+client_registry_suite/register_login_lookup_null,1,1,
+client_suite/invite,0,1,1 assertion(s) failed.: tests/client_test.c:223: Client module was not implemented
+client_suite/invite_accept,0,1,1 assertion(s) failed.: tests/client_test.c:396: Client module was not implemented
+client_suite/invite_accept_move,0,1,1 assertion(s) failed.: tests/client_test.c:502: Client module was not implemented
+client_suite/invite_accept_resign_source,0,1,1 assertion(s) failed.: tests/client_test.c:427: Client module was not implemented
+client_suite/invite_accept_resign_target,0,1,1 assertion(s) failed.: tests/client_test.c:465: Client module was not implemented
+client_suite/invite_decline,0,1,1 assertion(s) failed.: tests/client_test.c:247: Client module was not implemented
+client_suite/invite_decline_wrong,0,1,1 assertion(s) failed.: tests/client_test.c:307: Client module was not implemented
+client_suite/invite_resign_wrong,0,1,1 assertion(s) failed.: tests/client_test.c:367: Client module was not implemented
+client_suite/invite_revoke,0,1,1 assertion(s) failed.: tests/client_test.c:276: Client module was not implemented
+client_suite/invite_revoke_wrong,0,1,1 assertion(s) failed.: tests/client_test.c:337: Client module was not implemented
+client_suite/login_logout,0,1,1 assertion(s) failed.: tests/client_test.c:136: Client module was not implemented
+client_suite/random_invite_revoke,0,1,1 assertion(s) failed.: tests/client_test.c:573: Client module was not implemented
+client_suite/send_ack,0,1,1 assertion(s) failed.: tests/client_test.c:180: Client module was not implemented
+client_suite/send_nack,0,1,1 assertion(s) failed.: tests/client_test.c:203: Client module was not implemented
+client_suite/send_packet,0,1,1 assertion(s) failed.: tests/client_test.c:156: Client module was not implemented
+game_suite/create,1,1,
+game_suite/drawing_sequence,1,1,
+game_suite/illegal_move,1,1,
+game_suite/legal_moves,1,1,
+game_suite/parse_move_wrong_player,1,1,
+game_suite/parse_unparse_move,0,1,1 assertion(s) failed.: tests/game_test.c:178: Returned value was not NULL
+game_suite/random_moves,0,1,1 assertion(s) failed.: tests/game_test.c:416: Game winner (0) does not match expected (1) in game 0
+game_suite/resign,0,1,1 assertion(s) failed.: tests/game_test.c:74: Resigned game should be over
+game_suite/winning_sequence,0,1,1 assertion(s) failed.: tests/game_test.c:222: Returned value was not -1
+invitation_suite/concurrent_resign,0,1,The test crashed.: None
+invitation_suite/create_accept,1,1,
+invitation_suite/create_accept_close,0,1,1 assertion(s) failed.: tests/invitation_test.c:154: Returned value (0) was not -1
+invitation_suite/create_accept_resign,0,1,1 assertion(s) failed.: tests/invitation_test.c:183: The game should be over after a player resigns
+invitation_suite/create_close,1,1,
+invitation_suite/create_close_close,1,1,
+invitation_suite/create_different_clients,1,1,
+invitation_suite/create_same_client,1,1,
+player_registry_suite/many_threads_one_registry,0,1,"4 assertion(s) failed.: tests/player_registry_test.c:123: Returned player (0x7f5eec000fe0) did not match expected (0x7f5edc000f40)
+tests/player_registry_test.c:123: Returned player (0x7f5eec000fe0) did not match expected (0x7f5edc000f40)
+tests/player_registry_test.c:123: Returned player (0x7f5eec000fe0) did not match expected (0x7f5edc000f40)
+tests/player_registry_test.c:123: Returned player (0x7f5ee4000ea0) did not match expected (0x7f5eec000f20)"
+player_registry_suite/one_registry_one_player,1,1,
+player_registry_suite/one_registry_three_players,1,1,
+player_registry_suite/two_registries_two_players,1,1,
+player_suite/concurrent_post,0,1,1 assertion(s) failed.: tests/player_test.c:163: The sum of player ratings (9311) did not match the expected value (150000)
+player_suite/create,1,1,
+player_suite/post_result_draw,1,1,
+player_suite/post_result_first,1,1,
+player_suite/post_result_series,0,1,1 assertion(s) failed.: tests/player_test.c:104: Player rating (1516) does not match expected (1515)
+protocol_suite/recv_empty,1,1,
+protocol_suite/recv_error,1,1,
+protocol_suite/recv_no_payload,1,1,
+protocol_suite/recv_short_header,0,1,1 assertion(s) failed.: tests/protocol_test.c:186: Returned value was 0
+protocol_suite/recv_short_payload,0,1,1 assertion(s) failed.: tests/protocol_test.c:209: Returned value was 0
+protocol_suite/recv_with_payload,1,1,
+protocol_suite/send_error,1,1,
+protocol_suite/send_no_payload,1,1,
+protocol_suite/send_with_payload,1,1,
+server_suite/invite_accept_first,1,1,
+server_suite/invite_accept_move,1,1,
+server_suite/invite_accept_resign,0,1,1 assertion(s) failed.: tests/server_test.c:80: Packet type (ENDED) was not the expected type (RESIGNED)
+server_suite/invite_accept_second,1,1,
+server_suite/invite_decline,1,1,
+server_suite/invite_disconnect,1,1,
+server_suite/invite_revoke,1,1,
+server_suite/login_many_users,0,1,The test crashed.: None
+server_suite/login_users,1,1,
+server_suite/ping,1,1,
+server_suite/valid_login,1,1,
+student_suite/00_start_server,1,1,
+student_suite/01_connect,1,1,
+total,40,73
